@@ -17,7 +17,5 @@ dev_dependencies:
 script_runner:
   scripts:
     - name: echo
-      cmd: echo
-      args:
-        - "Hello World"
+      cmd: echo "Hello World"
       description: test script foobar

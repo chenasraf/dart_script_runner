@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:script_runner/src/utils.dart' as _utils;
 import 'package:yaml/yaml.dart' as yaml;
 import 'package:path/path.dart' as path;
 
@@ -10,7 +11,7 @@ Future<void> runScript(String entryName, List<String> args) async {
     throw Exception('No script named "$entryName" found.');
   }
 
-  return entry.run();
+  return entry.run(args);
 }
 
 Future<ScriptRunnerConfig> getConfig() async {
@@ -70,19 +71,26 @@ class RunnableScript {
 
   RunnableScript(this.name, {required this.cmd, required this.args});
 
-  factory RunnableScript.fromMap(yaml.YamlMap map) => RunnableScript(
-        map['name'] as String,
-        cmd: map['cmd'] as String,
-        args: List<String>.from(map['args'] ?? []),
-      );
+  factory RunnableScript.fromMap(yaml.YamlMap map) {
+    final cmdStr = map['cmd'] as String;
+    final cmd = cmdStr.split(' ').first;
+    final args = _utils.splitArgs(cmdStr.substring(cmd.length + 1));
 
-  Future<dynamic> run() async {
-    final argsStr = args.map((a) => '"$a"').join(' ');
+    return RunnableScript(
+      map['name'] as String,
+      cmd: cmd,
+      args: List<String>.from(args + (map['args'] ?? [])),
+    );
+  }
+
+  Future<dynamic> run(List<String> extraArgs) async {
+    final effectiveArgs = args + extraArgs;
+    final argsStr = effectiveArgs.map((a) => a.contains(' ') ? '"$a"' : a).join(' ');
     print('Running: "$cmd" $argsStr');
     try {
       final result = await Process.run('/bin/sh', [
         '-c',
-        [cmd, ...args].map((e) => '"$e"').join(' ')
+        [cmd, ...effectiveArgs].map((e) => '"$e"').join(' ')
       ]);
       stdout.write(result.stdout);
       stdout.write(result.stderr);
