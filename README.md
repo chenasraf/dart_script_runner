@@ -55,18 +55,18 @@ script_runner:
   env:
     MY_ENV: my-value
     # ...
+  # Scripts support either a short-format config, or a more verbose one with
+  # more possible argument to pass to each script.
+  # Scripts can reference other scripts, e.g. `script1` can reference
+  # `script2` by calling it directly in the command:
+  # - script1: echo '1'
+  # - name: script2
+  #   cmd: script1 && echo '2'
+  # Running `script1` will echo 1 and then 2.
   scripts:
-    # Scripts support either a short-format config, or a more verbose one with
-    # more possible argument to pass to each script.
-    # Scripts can reference other scripts, e.g. `script1` can reference
-    # `script2` by calling it directly in the command:
-    # - name: script1
-    #   cmd: echo '1'
-    # - name: script2
-    #   cmd: script1 && echo '2'
-    # Running `script` will echo 1 and then 2.
-    #
-    #
+    # short format - only name + cmd & args:
+    - my-short-script: my_scr arg1 arg2 arg3 && echo 'Done!'
+
     # more verbose config, for extra configuration
     - name: my-script
       # Optional - overrides the root-level config
