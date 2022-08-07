@@ -1,7 +1,7 @@
-import 'package:script_runner/src/script_runner_base.dart';
+import 'package:script_runner/src/base.dart';
 
 Future<void> main(List<String> args) async {
   final scriptCmd = args.first;
   final scriptArgs = args.sublist(1);
-  await runScript(scriptCmd, scriptArgs);
+  return runScript(scriptCmd, scriptArgs);
 }
