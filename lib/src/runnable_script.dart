@@ -1,4 +1,3 @@
-// ignore: no_leading_underscores_for_library_prefixes
 import 'dart:io';
 
 import 'package:file/file.dart';

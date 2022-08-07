@@ -1,9 +1,11 @@
 name: script_runner
 description: A starting point for Dart libraries or applications.
-version: 1.0.0
-# homepage: https://www.example.com
+version: 0.1.0
+homepage: https://casraf.blog/dart-script-runner/
+repository: https://github.com/chenasraf/dart_script_runner
+license: MIT
 environment:
-  sdk: ">=2.18.0-271.4.beta <3.0.0"
+  sdk: '>=2.18.0-271.4.beta <3.0.0'
 
 dependencies:
   file: ^6.1.2
@@ -23,7 +25,7 @@ script_runner:
     - name: echo2
       cmd: echo
       args:
-        - "Hello World"
+        - 'Hello World'
       description: test script foobar
     - name: activate-local
       cmd: dart pub global activate --source path ~/Dev/script_runner
