@@ -69,6 +69,8 @@ script_runner:
 
     # more verbose config, for extra configuration
     - name: my-script
+      # Optional - will be used in docs when using `dartsc -h`.
+      description: Run my script
       # Optional - overrides the root-level config
       cwd: .
       # Optional - overrides the root-level config

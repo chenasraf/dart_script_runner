@@ -12,6 +12,9 @@ class RunnableScript {
   /// The name of the script, as defined in the config.
   final String name;
 
+  /// The description of the script, used in help messages.
+  final String? description;
+
   /// The command to run the script with.
   final String cmd;
 
@@ -41,6 +44,7 @@ class RunnableScript {
     this.name, {
     required this.cmd,
     required this.args,
+    this.description,
     this.workingDir,
     this.env,
     FileSystem? fileSystem,
@@ -69,6 +73,7 @@ class RunnableScript {
     final cmd = rawCmd.split(' ').first;
     final rawArgs = (map['args'] as List<String>?) ?? [];
     final cmdArgs = utils.splitArgs(rawCmd.substring(cmd.length));
+    final description = map['description'] as String?;
     // print('cmdArgs: $cmdArgs');
 
     return RunnableScript(
@@ -76,6 +81,7 @@ class RunnableScript {
       cmd: cmd,
       args: cmdArgs + List<String>.from(rawArgs),
       fileSystem: fileSystem,
+      description: description,
     );
   }
 

@@ -100,4 +100,15 @@ class ScriptRunnerConfig {
         .toList();
     return scripts.map((s) => s..preloadScripts = scripts).toList();
   }
+
+  void printUsage() {
+    print('Dart Script Runner');
+    print('  Usage: dartsc script_name ...args');
+    print('');
+    print('  ${'-h, --help'.padRight(16, ' ')} Print this help message');
+    for (final scr in scripts) {
+      print(
+          '  ${scr.name.padRight(16, ' ')} ${scr.description ?? [scr.cmd, ...scr.args].join(' ')}');
+    }
+  }
 }
