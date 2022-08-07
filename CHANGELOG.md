@@ -1,7 +1,11 @@
-## 0.1.0
+## 0.1.2
 
-- Initial pre-release version.
+- Add `-h` flag with auto-script listing
 
 ## 0.1.1
 
 - Attempt to fix analyzer issues
+
+## 0.1.0
+
+- Initial pre-release version.
