@@ -1,5 +1,6 @@
 import 'package:script_runner/src/config.dart';
 
+/// Runs a script with the given name, and any extra arguments.
 Future<void> runScript(String entryName, List<String> args) async {
   final config = await ScriptRunnerConfig.get();
   final entry = config.scriptsMap[entryName];
