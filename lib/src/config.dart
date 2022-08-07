@@ -59,10 +59,12 @@ class ScriptRunnerConfig {
   /// If none are found, an Exception is thrown.
   static Future<ScriptRunnerConfig> get([FileSystem? fileSystem]) async {
     final fs = fileSystem ?? LocalFileSystem();
-    final source = (await _getPubspecScripts(fs)) ?? (await _getConfigScripts(fs));
+    final source =
+        (await _getPubspecScripts(fs)) ?? (await _getConfigScripts(fs));
 
     if (source == null) {
-      throw StateError('Must provide scripts in either pubspec.yaml or script_runner.yaml');
+      throw StateError(
+          'Must provide scripts in either pubspec.yaml or script_runner.yaml');
     }
 
     final env = <String, String>{}..addAll(
@@ -79,7 +81,8 @@ class ScriptRunnerConfig {
   }
 
   static Future<yaml.YamlMap?> _getPubspecScripts(FileSystem fileSystem) async {
-    final filePath = path.join(fileSystem.currentDirectory.path, 'pubspec.yaml');
+    final filePath =
+        path.join(fileSystem.currentDirectory.path, 'pubspec.yaml');
     final pubspec = await fileSystem.file(filePath).readAsString();
     final yaml.YamlMap contents = yaml.loadYaml(pubspec);
     final yaml.YamlMap? conf = contents['script_runner'];
@@ -87,7 +90,8 @@ class ScriptRunnerConfig {
   }
 
   static Future<yaml.YamlMap?>? _getConfigScripts(FileSystem fileSystem) async {
-    final filePath = path.join(fileSystem.currentDirectory.path, 'script_runner.yaml');
+    final filePath =
+        path.join(fileSystem.currentDirectory.path, 'script_runner.yaml');
     final pubspec = await fileSystem.file(filePath).readAsString();
     final yaml.YamlMap? conf = yaml.loadYaml(pubspec);
     return conf;
@@ -96,19 +100,23 @@ class ScriptRunnerConfig {
   static List<RunnableScript> _parseScriptsList(yaml.YamlList scriptsRaw,
       {FileSystem? fileSystem}) {
     final scripts = scriptsRaw
-        .map((script) => RunnableScript.fromYamlMap(script, fileSystem: fileSystem))
+        .map((script) =>
+            RunnableScript.fromYamlMap(script, fileSystem: fileSystem))
         .toList();
     return scripts.map((s) => s..preloadScripts = scripts).toList();
   }
 
+  /// Prints usage help text for this config
   void printUsage() {
     print('Dart Script Runner');
     print('  Usage: dartsc script_name ...args');
     print('');
     print('  ${'-h, --help'.padRight(16, ' ')} Print this help message');
     for (final scr in scripts) {
-      print(
-          '  ${scr.name.padRight(16, ' ')} ${scr.description ?? [scr.cmd, ...scr.args].join(' ')}');
+      print('  ${scr.name.padRight(16, ' ')} ${scr.description ?? [
+            scr.cmd,
+            ...scr.args
+          ].join(' ')}');
     }
   }
 }

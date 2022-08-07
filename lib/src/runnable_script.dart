@@ -51,7 +51,8 @@ class RunnableScript {
   }) : _fileSystem = fileSystem ?? LocalFileSystem();
 
   /// Generate a runnable script from a yaml loaded map as defined in the config.
-  factory RunnableScript.fromYamlMap(yaml.YamlMap map, {FileSystem? fileSystem}) {
+  factory RunnableScript.fromYamlMap(yaml.YamlMap map,
+      {FileSystem? fileSystem}) {
     final out = <String, dynamic>{};
 
     if (map['name'] == null && map.keys.length == 1) {
@@ -59,7 +60,8 @@ class RunnableScript {
       out['cmd'] = map.values.first;
     } else {
       out.addAll(map.cast<String, dynamic>());
-      out['args'] = (map['args'] as yaml.YamlList?)?.map((e) => e.toString()).toList();
+      out['args'] =
+          (map['args'] as yaml.YamlList?)?.map((e) => e.toString()).toList();
       out['env'] = (map['env'] as yaml.YamlMap?)?.cast<String, String>();
     }
 
@@ -67,7 +69,8 @@ class RunnableScript {
   }
 
   /// Generate a runnable script from a normal map as defined in the config.
-  factory RunnableScript.fromMap(Map<String, dynamic> map, {FileSystem? fileSystem}) {
+  factory RunnableScript.fromMap(Map<String, dynamic> map,
+      {FileSystem? fileSystem}) {
     final name = map['name'] as String;
     final rawCmd = map['cmd'] as String;
     final cmd = rawCmd.split(' ').first;
@@ -92,7 +95,9 @@ class RunnableScript {
     var config = await ScriptRunnerConfig.get(_fileSystem);
     final shell = config.shell ?? '/bin/sh';
 
-    final preRun = preloadScripts.map((d) => 'alias ${d.name}=\'dartsc ${d.name}\'').join(';');
+    final preRun = preloadScripts
+        .map((d) => 'alias ${d.name}=\'dartsc ${d.name}\'')
+        .join(';');
     final origCmd = [cmd, ...effectiveArgs.map(_wrap)].join(' ');
     final passCmd = '$preRun; eval \'$origCmd\'';
 
@@ -118,8 +123,8 @@ class RunnableScript {
       final exitCode = await result.exitCode;
       if (exitCode != 0) {
         // final stack = StackTrace.current;
-        final e =
-            ProcessException(cmd, args, 'Process exited with error code: $exitCode', exitCode);
+        final e = ProcessException(
+            cmd, args, 'Process exited with error code: $exitCode', exitCode);
         throw e;
       }
     } catch (e) {

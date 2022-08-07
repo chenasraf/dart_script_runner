@@ -1,3 +1,8 @@
+## 0.1.3
+
+- Update code formatting
+- Update docs
+
 ## 0.1.2
 
 - Add `-h` flag with auto-script listing

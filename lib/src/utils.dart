@@ -1,3 +1,4 @@
+/// Attempt to split arguments while taking into account quotes
 List<String> splitArgs(String string) {
   final out = <String>[];
   var cur = '';

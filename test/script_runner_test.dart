@@ -10,7 +10,8 @@ void main() {
     group('pubspec.yaml loader', () {
       setUp(() async {
         fs = MemoryFileSystem();
-        final pubFile = fs.file(path.join(fs.currentDirectory.path, 'pubspec.yaml'));
+        final pubFile =
+            fs.file(path.join(fs.currentDirectory.path, 'pubspec.yaml'));
         pubFile.create(recursive: true);
         await pubFile.writeAsString(
           [

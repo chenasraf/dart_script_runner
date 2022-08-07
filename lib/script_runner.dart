@@ -1,3 +1,4 @@
+/// This is the primary library used for loading and running scripts.
 library script_runner;
 
 export 'src/base.dart' show runScript;
