@@ -1,5 +1,6 @@
 import 'dart:io';
 
+// ignore: no_leading_underscores_for_library_prefixes
 import 'package:script_runner/src/utils.dart' as _utils;
 import 'package:yaml/yaml.dart' as yaml;
 import 'package:path/path.dart' as path;
@@ -8,7 +9,8 @@ Future<void> runScript(String entryName, List<String> args) async {
   final config = await getConfig();
   final entry = config.scriptsMap[entryName];
   if (entry == null) {
-    throw Exception('No script named "$entryName" found.');
+    throw Exception(
+        'No script named "$entryName" found. Available scripts: ${config.scriptsMap.keys.join(', ')}');
   }
 
   return entry.run(args);
@@ -21,40 +23,39 @@ Future<ScriptRunnerConfig> getConfig() async {
     throw StateError('Must provide scripts in either pubspec.yaml or script_runner.yaml');
   }
 
-  return ScriptRunnerConfig(source);
+  return ScriptRunnerConfig(
+    shell: source['shell'],
+    scripts: _parseScriptsList(source['scripts']),
+  );
 }
 
-List<RunnableScript> parseScriptsList(yaml.YamlList scriptsRaw) {
-  final scripts = scriptsRaw.map((script) => RunnableScript.fromMap(script)).toList();
-  return scripts;
+List<RunnableScript> _parseScriptsList(yaml.YamlList scriptsRaw) {
+  final scripts = scriptsRaw.map((script) => RunnableScript.fromYamlMap(script)).toList();
+  return scripts.map((s) => s..dependencies = scripts).toList();
 }
 
-Future<List<RunnableScript>?> getPubspecScripts() async {
+Future<yaml.YamlMap?> getPubspecScripts() async {
   final pubspec = await File(path.join(Directory.current.path, 'pubspec.yaml')).readAsString();
   final yaml.YamlMap contents = yaml.loadYaml(pubspec);
-  final yaml.YamlMap? scriptsRaw = contents['script_runner'];
-  if (scriptsRaw == null) {
-    return null;
-  }
-  final scripts = parseScriptsList(scriptsRaw['scripts'] as yaml.YamlList);
-  return scripts;
+  final yaml.YamlMap? conf = contents['script_runner'];
+  return conf;
 }
 
-Future<List<RunnableScript>?>? getConfigScripts() async {
+Future<yaml.YamlMap?>? getConfigScripts() async {
   final pubspec =
       await File(path.join(Directory.current.path, 'script_runner.yaml')).readAsString();
-  final yaml.YamlList? contents = yaml.loadYaml(pubspec);
-  if (contents == null) {
-    return null;
-  }
-  final scripts = parseScriptsList(contents);
-  return scripts;
+  final yaml.YamlMap? conf = yaml.loadYaml(pubspec);
+  return conf;
 }
 
 class ScriptRunnerConfig {
   final List<RunnableScript> scripts;
+  final String? shell;
 
-  ScriptRunnerConfig(this.scripts);
+  ScriptRunnerConfig({
+    this.shell,
+    required this.scripts,
+  });
 
   Map<String, RunnableScript> get scriptsMap {
     return Map.fromIterable(
@@ -68,33 +69,63 @@ class RunnableScript {
   final String name;
   final String cmd;
   final List<String> args;
+  List<RunnableScript> dependencies = [];
 
   RunnableScript(this.name, {required this.cmd, required this.args});
 
-  factory RunnableScript.fromMap(yaml.YamlMap map) {
-    final cmdStr = map['cmd'] as String;
-    final cmd = cmdStr.split(' ').first;
-    final args = _utils.splitArgs(cmdStr.substring(cmd.length + 1));
+  factory RunnableScript.fromYamlMap(yaml.YamlMap map) {
+    final out = <String, dynamic>{};
+
+    if (map['name'] == null && map.keys.length == 1) {
+      out['name'] = map.keys.first;
+      out['cmd'] = map.values.first;
+    } else {
+      out.addAll(map.cast<String, dynamic>());
+      out['args'] = (map['args'] as yaml.YamlList?)?.map((e) => e.toString()).toList();
+    }
+
+    return RunnableScript.fromMap(out);
+  }
+
+  factory RunnableScript.fromMap(Map<String, dynamic> map) {
+    final name = map['name'] as String;
+    final rawCmd = map['cmd'] as String;
+    final cmd = rawCmd.split(' ').first;
+    final rawArgs = (map['args'] as List<String>?) ?? [];
+    final cmdArgs = _utils.splitArgs(rawCmd.substring(cmd.length));
+    // print('cmdArgs: $cmdArgs');
 
     return RunnableScript(
-      map['name'] as String,
+      name,
       cmd: cmd,
-      args: List<String>.from(args + (map['args'] ?? [])),
+      args: cmdArgs + List<String>.from(rawArgs),
     );
   }
 
   Future<dynamic> run(List<String> extraArgs) async {
     final effectiveArgs = args + extraArgs;
-    final argsStr = effectiveArgs.map((a) => a.contains(' ') ? '"$a"' : a).join(' ');
-    print('Running: "$cmd" $argsStr');
+    // final argsStr = effectiveArgs.map(_wrap).join(' ');
+    final shell = (await getConfig()).shell ?? '/bin/sh';
+
+    final preRun = dependencies.map((d) => 'alias ${d.name}=\'dartsc ${d.name}\'').join(';');
+    final origCmd = [cmd, ...effectiveArgs.map(_wrap)].join(' ');
+    final passCmd = '$preRun; eval \'$origCmd\'';
+
+    print('Running: $origCmd');
+    // print("Before parse $cmd $args");
+
     try {
-      final result = await Process.run('/bin/sh', [
+      final result = await Process.start(shell, [
         '-c',
-        [cmd, ...effectiveArgs].map((e) => '"$e"').join(' ')
+        passCmd,
       ]);
-      stdout.write(result.stdout);
-      stdout.write(result.stderr);
-      final exitCode = result.exitCode;
+      result.stdout.listen((event) {
+        stdout.write(String.fromCharCodes(event));
+      });
+      result.stderr.listen((event) {
+        stdout.write(String.fromCharCodes(event));
+      });
+      final exitCode = await result.exitCode;
       if (exitCode != 0) {
         // final stack = StackTrace.current;
         final e =
@@ -105,4 +136,11 @@ class RunnableScript {
       rethrow;
     }
   }
+}
+
+String _wrap(String arg) {
+  if (arg.contains(' ')) {
+    return '"$arg"';
+  }
+  return arg;
 }

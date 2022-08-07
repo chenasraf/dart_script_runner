@@ -2,20 +2,33 @@ name: script_runner
 description: A starting point for Dart libraries or applications.
 version: 1.0.0
 # homepage: https://www.example.com
-
 environment:
   sdk: ">=2.18.0-271.4.beta <3.0.0"
 
 dependencies:
+  path: ^1.8.2
   yaml: ^3.1.1
-#   path: ^1.8.0
 
 dev_dependencies:
   lints: ^2.0.0
   test: ^1.16.0
 
 script_runner:
+  shell: /bin/zsh
   scripts:
-    - name: echo
+    - name: echo1
       cmd: echo "Hello World"
       description: test script foobar
+    - name: echo2
+      cmd: echo
+      args:
+        - "Hello World"
+      description: test script foobar
+    - name: activate-local
+      cmd: dart pub global activate --source path ~/Dev/script_runner
+    - name: combined
+      cmd: echo 'test' && echo1 && echo2
+    - short: echo 'this is a short script'
+
+executables:
+  dartsc: script_runner

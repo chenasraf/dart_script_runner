@@ -34,5 +34,8 @@ List<String> splitArgs(String string) {
     cur += char;
     // print('cur: $cur, out: $out');
   }
+  if (cur.isNotEmpty) {
+    out.add(cur);
+  }
   return out.where((e) => e.isNotEmpty).toList();
 }
