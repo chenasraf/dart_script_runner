@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:io' as io;
 
 import 'package:file/file.dart';
 import 'package:file/local.dart';
@@ -93,7 +93,7 @@ class RunnableScript {
     final effectiveArgs = args + extraArgs;
     // final argsStr = effectiveArgs.map(_wrap).join(' ');
     var config = await ScriptRunnerConfig.get(_fileSystem);
-    final shell = config.shell ?? '/bin/sh';
+    final shell = config.shell ?? _getPlatformShell();
 
     final preRun = preloadScripts
         .map((d) => 'alias ${d.name}=\'dartsc ${d.name}\'')
@@ -105,7 +105,7 @@ class RunnableScript {
     // print("Before parse $cmd $args");
 
     try {
-      final result = await Process.start(
+      final result = await io.Process.start(
         shell,
         [
           '-c',
@@ -115,21 +115,28 @@ class RunnableScript {
         workingDirectory: workingDir ?? config.workingDir,
       );
       result.stdout.listen((event) {
-        stdout.write(String.fromCharCodes(event));
+        io.stdout.write(String.fromCharCodes(event));
       });
       result.stderr.listen((event) {
-        stdout.write(String.fromCharCodes(event));
+        io.stdout.write(String.fromCharCodes(event));
       });
       final exitCode = await result.exitCode;
       if (exitCode != 0) {
         // final stack = StackTrace.current;
-        final e = ProcessException(
+        final e = io.ProcessException(
             cmd, args, 'Process exited with error code: $exitCode', exitCode);
         throw e;
       }
     } catch (e) {
       rethrow;
     }
+  }
+
+  static String _getPlatformShell() {
+    if (io.Platform.isWindows) {
+      return 'cmd.exe';
+    }
+    return '/bin/sh';
   }
 }
 

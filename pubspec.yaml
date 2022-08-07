@@ -1,7 +1,7 @@
 name: script_runner
 description: Run all your project-related scripts in a portable, simple config.
-version: 0.1.3
-homepage: https://casraf.blog/dart-script-runner/
+version: 0.1.4
+homepage: https://casraf.blog/
 repository: https://github.com/chenasraf/dart_script_runner
 license: MIT
 environment:
@@ -28,7 +28,7 @@ script_runner:
         - 'Hello World'
       description: test script foobar
     - name: activate-local
-      cmd: dart pub global activate --source path ~/Dev/script_runner
+      cmd: dart pub global activate --source path ./
     - name: combined
       cmd: echo 'test' && echo1 && echo2
     - short: echo 'this is a short script'
