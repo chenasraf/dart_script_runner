@@ -1,0 +1,12 @@
+# add a config in the script_runner.yaml
+# note! there is no `script_runner` key at the root here:
+shell: /bin/zsh
+scripts:
+  - test: dart test
+  - lint-fix: dart fix --apply
+  - name: build:apk
+    cmd: flutter build apk
+  - name: build:ipa
+    cmd: flutter build ipa
+  - name: build:all
+    cmd: build:apk && build:ipa
