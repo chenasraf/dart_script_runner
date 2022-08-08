@@ -1,7 +1,22 @@
-# Dart Script Runner
+<h1>Dart Script Runner</h1>
 
 A general script runner for any type of project - run all your project-related scripts and commands
 in a portable, simple config.
+
+<details>
+<summary>Table of contents</summary>
+
+- [What for?](#what-for)
+- [Features](#features)
+- [Getting started](#getting-started)
+- [Usage](#usage)
+  - [Normal usage (config file)](#normal-usage-config-file)
+  - [Advanced usage (Dart import)](#advanced-usage-dart-import)
+- [Contributing](#contributing)
+
+</details>
+
+---
 
 ## What for?
 
@@ -16,10 +31,13 @@ to work similarly, though it can be customized to fit your needs more specifical
 - **Easy:** Provides an easy to use config for project-related scripts, similar to what NPM allows
   in its `scripts` section of `package.json`.
 - **Portable:** The scripts are meant to be portable and can reference each-other, to maximize the
-  flexibility of creating configurable script execution orders &amp; dependencies.
+  flexibility of creating configurable script execution orders &amp; dependencies. Also you don't
+  have to be on a dart project, just add a `script_runner.yaml` file to any folder and you're good
+  to go!
 - **Self-documenting:** Removes the need to document where and how to load different types of
-  scripts on your project. Unify all your runners into 1 config that lets you freely call everything
-  on-demand, and also supply an auto-generated documentation using `scr -h`.
+  scripts on your project, or create custom script loaders and more time-wasting pipeline. Unify all
+  your runners into 1 config that lets you freely call everything on-demand from any type of
+  project, and also supply an auto-generated documentation using `scr -h`.
 
 ## Getting started
 
@@ -36,7 +54,12 @@ you are currently in.
 scr my-script ...args
 ```
 
+You can also install this package as a dependency and build/run your own script lists. (but why
+would you?)
+
 ## Usage
+
+### Normal usage (config file)
 
 Add the `script_runner` config to your `pubspec.yaml` under `script_runner`, or alternatively you
 can use a separate config file named `script_runner.yaml` at the root of your project.
@@ -111,6 +134,34 @@ changing the working directory as needed.
 
 More arguments can be passed during the call to the script, which will then be piped to the original
 `cmd`.
+
+### Advanced usage (Dart import)
+
+If you want to build your own configs dynamically in Dart, you can import the package and create
+your own runners and scripts:
+
+```dart
+import 'package:script_runner/script_runner.dart';
+
+void main() {
+  // Directly run a script from config, same as running `scr`
+  runScript('my-script', ['arg1', 'arg2'])
+
+  // Build your own configurations and scripts and run them as you please:
+  final runner = ScriptRunnerConfig(
+    shell: '/bin/zsh',
+    scripts: [
+      RunnableScript(
+        name: 'my-script',
+        cmd: 'echo',
+        args: ['Hello world'],
+      ),
+    ],
+  );
+
+  runner.scriptsMap['my-script'].run();
+}
+```
 
 ## Contributing
 

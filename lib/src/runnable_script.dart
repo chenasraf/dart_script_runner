@@ -122,6 +122,7 @@ class RunnableScript {
         io.stdout.write(Utf8Decoder().convert(event));
       });
       final exitCode = await result.exitCode;
+      print('');
       if (exitCode != 0) {
         final e = io.ProcessException(
             cmd, args, 'Process exited with error code: $exitCode', exitCode);
