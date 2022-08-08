@@ -1,5 +1,6 @@
 library script_runner;
 
+import 'dart:math' as math;
 import 'package:script_runner/src/runnable_script.dart';
 import 'package:yaml/yaml.dart' as yaml;
 import 'package:path/path.dart' as path;
@@ -24,6 +25,9 @@ class ScriptRunnerConfig {
   /// If left `null`, defaults to no overrides.
   final Map<String, String>? env;
 
+  /// The length of the lines in the help description, which causes text overflowing to the next line when necessary.
+  final int lineLength;
+
   final FileSystem? _fileSystem;
 
   /// The filesystem used for loading scripts.
@@ -40,6 +44,7 @@ class ScriptRunnerConfig {
     this.workingDir,
     this.env,
     FileSystem? fileSystem,
+    this.lineLength = 80,
   }) : _fileSystem = fileSystem ?? LocalFileSystem();
 
   /// A map of the registered scripts, keyed by name.
@@ -60,7 +65,7 @@ class ScriptRunnerConfig {
   static Future<ScriptRunnerConfig> get([FileSystem? fileSystem]) async {
     final fs = fileSystem ?? LocalFileSystem();
     final source =
-        (await _getPubspecScripts(fs)) ?? (await _getConfigScripts(fs));
+        (await _getPubspecConfig(fs)) ?? (await _getCustomConfig(fs));
 
     if (source == null) {
       throw StateError(
@@ -77,22 +82,31 @@ class ScriptRunnerConfig {
       env: env,
       workingDir: source['cwd'],
       fileSystem: fileSystem,
+      lineLength: source['line_length'] ?? 80,
     );
   }
 
-  static Future<yaml.YamlMap?> _getPubspecScripts(FileSystem fileSystem) async {
+  static Future<yaml.YamlMap?> _getPubspecConfig(FileSystem fileSystem) async {
     final filePath =
         path.join(fileSystem.currentDirectory.path, 'pubspec.yaml');
-    final pubspec = await fileSystem.file(filePath).readAsString();
+    final file = fileSystem.file(filePath);
+    if (!file.existsSync()) {
+      return null;
+    }
+    final pubspec = await file.readAsString();
     final yaml.YamlMap contents = yaml.loadYaml(pubspec);
     final yaml.YamlMap? conf = contents['script_runner'];
     return conf;
   }
 
-  static Future<yaml.YamlMap?>? _getConfigScripts(FileSystem fileSystem) async {
+  static Future<yaml.YamlMap?>? _getCustomConfig(FileSystem fileSystem) async {
     final filePath =
         path.join(fileSystem.currentDirectory.path, 'script_runner.yaml');
-    final pubspec = await fileSystem.file(filePath).readAsString();
+    final file = fileSystem.file(filePath);
+    if (!file.existsSync()) {
+      return null;
+    }
+    final pubspec = await file.readAsString();
     final yaml.YamlMap? conf = yaml.loadYaml(pubspec);
     return conf;
   }
@@ -109,14 +123,39 @@ class ScriptRunnerConfig {
   /// Prints usage help text for this config
   void printUsage() {
     print('Dart Script Runner');
-    print('  Usage: dartsc script_name ...args');
+    print('  Usage: scr script_name ...args');
     print('');
-    print('  ${'-h, --help'.padRight(16, ' ')} Print this help message');
+    var maxLen = 0;
     for (final scr in scripts) {
-      print('  ${scr.name.padRight(16, ' ')} ${scr.description ?? [
-            scr.cmd,
-            ...scr.args
-          ].join(' ')}');
+      maxLen = math.max(maxLen, scr.name.length);
+    }
+    final padLen = maxLen + 6;
+    print('  ${'-h, --help'.padRight(padLen, ' ')} Print this help message\n');
+    for (final scr in scripts) {
+      final lines = _chunks(
+        scr.description ?? [scr.cmd, ...scr.args].join(' '),
+        80 - padLen,
+      );
+      print('  ${scr.name.padRight(padLen, ' ')} ${lines.first}');
+      for (final line in lines.sublist(1)) {
+        print('  ${''.padRight(padLen, ' ')} ${line}');
+      }
+      print('');
     }
   }
+}
+
+List<String> _chunks(String str, int maxLen) {
+  final words = str.split(' ');
+  final chunks = <String>[];
+  var chunk = '';
+  for (final word in words) {
+    if (chunk.length + word.length > maxLen) {
+      chunks.add(chunk);
+      chunk = '';
+    }
+    chunk += '$word ';
+  }
+  chunks.add(chunk);
+  return chunks;
 }

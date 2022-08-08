@@ -18,10 +18,11 @@ dev_dependencies:
 
 script_runner:
   shell: /bin/zsh
+  line_length: 80
   scripts:
     - name: echo1
       cmd: echo "Hello World"
-      description: test script foobar
+      description: Interdum a scelerisque arcu felis taciti ligula pellentesque curabitur, suspendisse adipiscing quisque sed luctus elementum in imperdiet id, praesent enim sem justo sapien diam nec. Quisque erat risus sagittis penatibus per, vehicula sociosqu cubilia convallis, sollicitudin scelerisque cras aptent. Natoque ornare dictumst netus litora mollis suspendisse cubilia proin morbi primis consequat eu massa, cursus non urna ridiculus dolor duis tempus ut nam velit lacus viverra. A interdum senectus eu mus leo aptent facilisi augue tristique ante purus condimentum pulvinar porta viverra morbi, et tellus gravida porttitor non euismod suscipit neque egestas praesent arcu luctus pharetra fusce. Luctus mauris a venenatis tempus cras ante efficitur massa ultricies mollis lacus, volutpat nisi lacinia himenaeos facilisi in aliquet sodales purus integer vitae quisque, libero torquent enim mattis placerat tortor mi dignissim viverra sem.
     - name: echo2
       cmd: echo
       args:
@@ -35,4 +36,4 @@ script_runner:
     - auto-fix: dart fix --apply
 
 executables:
-  dartsc: script_runner
+  scr: script_runner

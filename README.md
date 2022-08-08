@@ -1,17 +1,4 @@
-<!--
-This README describes the package. If you publish this package to pub.dev,
-this README's contents appear on the landing page for your package.
-
-For information about how to write a good package README, see the guide for
-[writing package pages](https://dart.dev/guides/libraries/writing-package-pages).
-
-For general information about developing packages, see the Dart guide for
-[creating packages](https://dart.dev/guides/libraries/create-library-packages)
-and the Flutter guide for
-[developing packages and plugins](https://flutter.dev/developing-packages).
--->
-
-# script_runner
+# Dart Script Runner
 
 A general script runner for dart projects - run all your project-related scripts in a portable,
 simple config.
@@ -24,7 +11,7 @@ simple config.
   flexibility of creating configurable script execution orders &amp; dependencies.
 - **Self-documenting:** Removes the need to document where and how to load different types of
   scripts on your project. Unify all your runners into 1 config that lets you freely call everything
-  on-demand, and also supply an auto-generated documentation using `dartsc -h`.
+  on-demand, and also supply an auto-generated documentation using `scr -h`.
 
 ## Getting started
 
@@ -34,8 +21,12 @@ You can install this package globally for the most easy usage.
 pub global activate script_runner
 ```
 
-Once activated, you can use the supplied `dartsc` executable to directly call scripts from any
-project you are currently in.
+Once activated, you can use the supplied `scr` executable to directly call scripts from any project
+you are currently in.
+
+```shell
+scr my-script ...args
+```
 
 ## Usage
 
@@ -47,7 +38,7 @@ This is the structure of a config:
 ```yaml
 # only use this key if you are inside pubspec.yaml. Otherwise, it's not needed
 script_runner:
-  # The shell to run all of the scripts with. (optional)
+  # The shell to run all of the scripts with. (optional - defaults to OS shell)
   shell: /bin/sh
   # The current working directory to run the scripts in. (optional)
   cwd: .
@@ -55,6 +46,9 @@ script_runner:
   env:
     MY_ENV: my-value
     # ...
+  # The amount of characters to allow before considering the line over when
+  # printing help usage (scr -h)
+  line_length: 80
   # Scripts support either a short-format config, or a more verbose one with
   # more possible argument to pass to each script.
   # Scripts can reference other scripts, e.g. `script1` can reference
@@ -69,7 +63,7 @@ script_runner:
 
     # more verbose config, for extra configuration
     - name: my-script
-      # Optional - will be used in docs when using `dartsc -h`.
+      # Optional - will be used in docs when using `scr -h`.
       description: Run my script
       # Optional - overrides the root-level config
       cwd: .
@@ -85,3 +79,9 @@ script_runner:
         - arg2
         - arg3
 ```
+
+For this config, running `scr my-script` will run the appropriate script, filling the env and
+changing the working directory as needed.
+
+More arguments can be passed during the call to the script, which will then be piped to the original
+`cmd`.

@@ -96,7 +96,7 @@ class RunnableScript {
     final shell = config.shell ?? _getPlatformShell();
 
     final preRun = preloadScripts
-        .map((d) => 'alias ${d.name}=\'dartsc ${d.name}\'')
+        .map((d) => 'alias ${d.name}=\'scr ${d.name}\'')
         .join(';');
     final origCmd = [cmd, ...effectiveArgs.map(_wrap)].join(' ');
     final passCmd = '$preRun; eval \'$origCmd\'';
