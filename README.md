@@ -40,6 +40,13 @@ This is the structure of a config:
 script_runner:
   # The shell to run all of the scripts with. (optional - defaults to OS shell)
   shell: /bin/sh
+  # Use a map to define shell per OS, when not specified falls back to "default":
+  # (optional)
+  shell:
+    default: /bin/sh
+    windows: cmd.exe
+    macos: /bin/sh
+    linux: /bin/sh
   # The current working directory to run the scripts in. (optional)
   cwd: .
   # Environment variables to add to the running shells in the scripts. (optional)

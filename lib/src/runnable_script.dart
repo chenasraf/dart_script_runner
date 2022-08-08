@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io' as io;
 
 import 'package:file/file.dart';
@@ -93,7 +94,7 @@ class RunnableScript {
     final effectiveArgs = args + extraArgs;
     // final argsStr = effectiveArgs.map(_wrap).join(' ');
     var config = await ScriptRunnerConfig.get(_fileSystem);
-    final shell = config.shell ?? _getPlatformShell();
+    final shell = config.shell.shell;
 
     final preRun = preloadScripts
         .map((d) => 'alias ${d.name}=\'scr ${d.name}\'')
@@ -115,14 +116,13 @@ class RunnableScript {
         workingDirectory: workingDir ?? config.workingDir,
       );
       result.stdout.listen((event) {
-        io.stdout.write(String.fromCharCodes(event));
+        io.stdout.write(Utf8Decoder().convert(event));
       });
       result.stderr.listen((event) {
-        io.stdout.write(String.fromCharCodes(event));
+        io.stdout.write(Utf8Decoder().convert(event));
       });
       final exitCode = await result.exitCode;
       if (exitCode != 0) {
-        // final stack = StackTrace.current;
         final e = io.ProcessException(
             cmd, args, 'Process exited with error code: $exitCode', exitCode);
         throw e;
@@ -130,13 +130,6 @@ class RunnableScript {
     } catch (e) {
       rethrow;
     }
-  }
-
-  static String _getPlatformShell() {
-    if (io.Platform.isWindows) {
-      return 'cmd.exe';
-    }
-    return '/bin/sh';
   }
 }
 

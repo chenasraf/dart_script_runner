@@ -1,3 +1,8 @@
+## 0.1.5
+
+- Fix utf8 decoding in process output
+- Add shell config per OS
+
 ## 0.1.4
 
 - Rename bin from `dartsc` to `scr`

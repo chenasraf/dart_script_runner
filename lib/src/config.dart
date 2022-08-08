@@ -1,5 +1,6 @@
 library script_runner;
 
+import 'dart:io';
 import 'dart:math' as math;
 import 'package:script_runner/src/runnable_script.dart';
 import 'package:yaml/yaml.dart' as yaml;
@@ -15,7 +16,7 @@ class ScriptRunnerConfig {
   /// The shell to use for running scripts. You may provide any executable path here.
   ///
   /// Shell will be run with the commands with `[shell] -c '...'`.
-  final String? shell;
+  final ScriptRunnerShellConfig shell;
 
   /// The default working directory for the scripts to run in.
   /// If left `null`, defaults to current directory.
@@ -40,7 +41,7 @@ class ScriptRunnerConfig {
   /// See each argument for more details.
   ScriptRunnerConfig({
     required this.scripts,
-    this.shell,
+    this.shell = const ScriptRunnerShellConfig(),
     this.workingDir,
     this.env,
     FileSystem? fileSystem,
@@ -77,7 +78,7 @@ class ScriptRunnerConfig {
       );
 
     return ScriptRunnerConfig(
-      shell: source['shell'],
+      shell: ScriptRunnerShellConfig.parse(source['shell']),
       scripts: _parseScriptsList(source['scripts'], fileSystem: fs),
       env: env,
       workingDir: source['cwd'],
@@ -111,8 +112,10 @@ class ScriptRunnerConfig {
     return conf;
   }
 
-  static List<RunnableScript> _parseScriptsList(yaml.YamlList scriptsRaw,
-      {FileSystem? fileSystem}) {
+  static List<RunnableScript> _parseScriptsList(
+    yaml.YamlList scriptsRaw, {
+    FileSystem? fileSystem,
+  }) {
     final scripts = scriptsRaw
         .map((script) =>
             RunnableScript.fromYamlMap(script, fileSystem: fileSystem))
@@ -138,10 +141,63 @@ class ScriptRunnerConfig {
       );
       print('  ${scr.name.padRight(padLen, ' ')} ${lines.first}');
       for (final line in lines.sublist(1)) {
-        print('  ${''.padRight(padLen, ' ')} ${line}');
+        print('  ${''.padRight(padLen, ' ')} $line');
       }
       print('');
     }
+  }
+}
+
+/// Configuration for shell to use for running scripts.
+class ScriptRunnerShellConfig {
+  final String? defaultShell;
+  final String? windows;
+  final String? macos;
+  final String? linux;
+
+  /// Create a new shell configuration from given arguments.
+  /// When no shell is specified for a platform, the default shell is used.
+  const ScriptRunnerShellConfig({
+    this.defaultShell,
+    this.windows,
+    this.macos,
+    this.linux,
+  });
+
+  /// Parses a shell configuration from a YAML map, dart map or string.
+  factory ScriptRunnerShellConfig.parse(dynamic obj) {
+    if (obj is String) {
+      return ScriptRunnerShellConfig(defaultShell: obj);
+    }
+    if (obj is yaml.YamlMap || obj is Map) {
+      return ScriptRunnerShellConfig(
+        defaultShell: obj['default'],
+        windows: obj['windows'],
+        macos: obj['macos'],
+        linux: obj['linux'],
+      );
+    }
+    throw StateError('Invalid shell config: $obj');
+  }
+
+  /// Get the shell to use for the given platform.
+  String get shell => _getShell();
+
+  String _getShell() {
+    if (Platform.isWindows) {
+      return windows ?? defaultShell ?? _osShell();
+    } else if (Platform.isMacOS) {
+      return macos ?? defaultShell ?? _osShell();
+    } else {
+      return linux ?? defaultShell ?? _osShell();
+    }
+  }
+
+  String _osShell() {
+    if (Platform.isWindows) {
+      return 'cmd.exe';
+    }
+    return '/bin/sh';
   }
 }
 
