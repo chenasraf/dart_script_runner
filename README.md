@@ -1,7 +1,15 @@
 # Dart Script Runner
 
-A general script runner for dart projects - run all your project-related scripts in a portable,
-simple config.
+A general script runner for any type of project - run all your project-related scripts and commands
+in a portable, simple config.
+
+## What for?
+
+You might use it to chain multiple commands into a unified build process, format and lint your
+documents, or more.
+
+This project was developed with inspiration from NPM's `scripts` inside `package.json` and is meant
+to work similarly, though it can be customized to fit your needs more specifically.
 
 ## Features
 
@@ -33,7 +41,18 @@ scr my-script ...args
 Add the `script_runner` config to your `pubspec.yaml` under `script_runner`, or alternatively you
 can use a separate config file named `script_runner.yaml` at the root of your project.
 
-This is the structure of a config:
+A bare-bones example looks like this:
+
+```yaml
+script_runner:
+  scripts:
+    - doc: dart doc
+    - publish: dart pub publish
+    - deploy: doc && publish
+    - auto-fix: dart fix --apply
+```
+
+This is the full structure of a config:
 
 ```yaml
 # only use this key if you are inside pubspec.yaml. Otherwise, it's not needed
@@ -92,3 +111,27 @@ changing the working directory as needed.
 
 More arguments can be passed during the call to the script, which will then be piped to the original
 `cmd`.
+
+## Contributing
+
+I am developing this package on my free time, so any support, whether code, issues, or just stars is
+very helpful to sustaining its life. If you are feeling incredibly generous and would like to donate
+just a small amount to help sustain this project, I would be very very thankful!
+
+<a href='https://ko-fi.com/casraf' target='_blank'>
+  <img height='36' style='border:0px;height:36px;'
+    src='https://cdn.ko-fi.com/cdn/kofi1.png?v=3'
+    alt='Buy Me a Coffee at ko-fi.com' />
+</a>
+
+I welcome any issues or pull requests on GitHub. If you find a bug, or would like a new feature,
+don't hesitate to open an appropriate issue and I will do my best to reply promptly.
+
+If you are a developer and want to contribute code, here are some starting tips:
+
+1. Fork this repository
+2. Run `dart pub get`
+3. Make any changes you would like
+4. Create tests for your changes
+5. Update the relevant documentation (readme, code comments)
+6. Create a PR on upstream
