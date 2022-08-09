@@ -1,4 +1,5 @@
 /// Attempt to split arguments while taking into account quotes
+// @internal
 List<String> splitArgs(String string) {
   final out = <String>[];
   var cur = '';
@@ -39,4 +40,30 @@ List<String> splitArgs(String string) {
     out.add(cur);
   }
   return out.where((e) => e.isNotEmpty).toList();
+}
+
+/// Split string into chunks of [maxLen] characters.
+// @internal
+List<String> chunks(String str, int maxLen) {
+  final words = str.split(' ');
+  final chunks = <String>[];
+  var chunk = '';
+  for (final word in words) {
+    if (chunk.length + word.length > maxLen) {
+      chunks.add(chunk);
+      chunk = '';
+    }
+    chunk += '$word ';
+  }
+  chunks.add(chunk);
+  return chunks;
+}
+
+/// wrap args with quotes if necessary
+// @internal
+String wrap(String arg) {
+  if (arg.contains(' ')) {
+    return '"$arg"';
+  }
+  return arg;
 }

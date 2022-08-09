@@ -1,3 +1,7 @@
+## 0.1.6
+
+- Code improvements
+
 ## 0.1.5
 
 - Fix utf8 decoding in process output

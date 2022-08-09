@@ -3,6 +3,8 @@ library script_runner;
 import 'dart:io';
 import 'dart:math' as math;
 import 'package:script_runner/src/runnable_script.dart';
+// ignore: no_leading_underscores_for_library_prefixes
+import 'utils.dart' as _utils;
 import 'package:yaml/yaml.dart' as yaml;
 import 'package:path/path.dart' as path;
 import 'package:file/file.dart';
@@ -135,7 +137,7 @@ class ScriptRunnerConfig {
     final padLen = maxLen + 6;
     print('  ${'-h, --help'.padRight(padLen, ' ')} Print this help message\n');
     for (final scr in scripts) {
-      final lines = _chunks(
+      final lines = _utils.chunks(
         scr.description ?? [scr.cmd, ...scr.args].join(' '),
         80 - padLen,
       );
@@ -188,9 +190,10 @@ class ScriptRunnerShellConfig {
       return windows ?? defaultShell ?? _osShell();
     } else if (Platform.isMacOS) {
       return macos ?? defaultShell ?? _osShell();
-    } else {
+    } else if (Platform.isLinux) {
       return linux ?? defaultShell ?? _osShell();
     }
+    return defaultShell ?? _osShell();
   }
 
   String _osShell() {
@@ -199,19 +202,4 @@ class ScriptRunnerShellConfig {
     }
     return '/bin/sh';
   }
-}
-
-List<String> _chunks(String str, int maxLen) {
-  final words = str.split(' ');
-  final chunks = <String>[];
-  var chunk = '';
-  for (final word in words) {
-    if (chunk.length + word.length > maxLen) {
-      chunks.add(chunk);
-      chunk = '';
-    }
-    chunk += '$word ';
-  }
-  chunks.add(chunk);
-  return chunks;
 }

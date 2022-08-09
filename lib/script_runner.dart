@@ -2,5 +2,5 @@
 library script_runner;
 
 export 'src/base.dart' show runScript;
-export 'src/config.dart';
-export 'src/runnable_script.dart';
+export 'src/config.dart' show ScriptRunnerConfig, ScriptRunnerShellConfig;
+export 'src/runnable_script.dart' show RunnableScript;

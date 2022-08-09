@@ -4,7 +4,8 @@ import 'dart:io' as io;
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:script_runner/src/config.dart';
-import 'package:script_runner/src/utils.dart' as utils;
+// ignore: no_leading_underscores_for_library_prefixes
+import 'package:script_runner/src/utils.dart' as _utils;
 import 'package:yaml/yaml.dart' as yaml;
 
 /// A runnable script with pre-defined name, cmd and args. May be run using the `run` command and optionally
@@ -76,7 +77,7 @@ class RunnableScript {
     final rawCmd = map['cmd'] as String;
     final cmd = rawCmd.split(' ').first;
     final rawArgs = (map['args'] as List<String>?) ?? [];
-    final cmdArgs = utils.splitArgs(rawCmd.substring(cmd.length));
+    final cmdArgs = _utils.splitArgs(rawCmd.substring(cmd.length));
     final description = map['description'] as String?;
     // print('cmdArgs: $cmdArgs');
 
@@ -99,7 +100,7 @@ class RunnableScript {
     final preRun = preloadScripts
         .map((d) => 'alias ${d.name}=\'scr ${d.name}\'')
         .join(';');
-    final origCmd = [cmd, ...effectiveArgs.map(_wrap)].join(' ');
+    final origCmd = [cmd, ...effectiveArgs.map(_utils.wrap)].join(' ');
     final passCmd = '$preRun; eval \'$origCmd\'';
 
     print('Running: $origCmd');
@@ -132,11 +133,4 @@ class RunnableScript {
       rethrow;
     }
   }
-}
-
-String _wrap(String arg) {
-  if (arg.contains(' ')) {
-    return '"$arg"';
-  }
-  return arg;
 }
