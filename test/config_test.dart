@@ -42,6 +42,27 @@ void main() {
   });
 
   group('ScriptRunnerShellConfig', () {
+    group('no shell', () {
+      setUp(() async {
+        fs = MemoryFileSystem();
+        await _writePubspec(
+          fs,
+          [
+            'script_runner:',
+            '  scripts:',
+            '    - name: test',
+            '      cwd: .',
+            '      cmd: echo "hello"',
+          ].join('\n'),
+        );
+      });
+
+      test('works', () async {
+        final conf = await ScriptRunnerConfig.get(fs);
+        expect(conf.shell.shell, Platform.environment['SHELL']);
+      });
+    });
+
     group('plain shell', () {
       setUp(() async {
         fs = MemoryFileSystem();
