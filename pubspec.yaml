@@ -18,26 +18,26 @@ dev_dependencies:
 
 script_runner:
   # line_length: 100
-  # scripts:
-  # Real
-  - auto-fix: dart fix --apply
-  - publish: dart pub publish
-  - doc: dart doc
+  scripts:
+    # Real
+    - auto-fix: dart fix --apply
+    - publish: dart pub publish
+    - doc: dart doc
 
-  # Examples
-  - name: echo1
-    cmd: echo "Hello World" $SHELL
-    description: Interdum a scelerisque arcu felis taciti ligula pellentesque curabitur, suspendisse adipiscing quisque sed luctus elementum in imperdiet id, praesent enim sem justo sapien diam nec. Quisque erat risus sagittis penatibus per, vehicula sociosqu cubilia convallis, sollicitudin scelerisque cras aptent. Natoque ornare dictumst netus litora mollis suspendisse cubilia proin morbi primis consequat eu massa, cursus non urna ridiculus dolor duis tempus ut nam velit lacus viverra. A interdum senectus eu mus leo aptent facilisi augue tristique ante purus condimentum pulvinar porta viverra morbi, et tellus gravida porttitor non euismod suscipit neque egestas praesent arcu luctus pharetra fusce. Luctus mauris a venenatis tempus cras ante efficitur massa ultricies mollis lacus, volutpat nisi lacinia himenaeos facilisi in aliquet sodales purus integer vitae quisque, libero torquent enim mattis placerat tortor mi dignissim viverra sem.
-  - name: echo2
-    cmd: echo
-    args:
-      - 'Hello World'
-    description: test script foobar
-  - name: activate-local
-    cmd: dart pub global activate --source path ./
-  - name: combined
-    cmd: echo 'test' && echo1 && echo2
-  - short: echo 'this is a short script'
+    # Examples
+    - name: echo1
+      cmd: echo "Hello World" $SHELL
+      description: Interdum a scelerisque arcu felis taciti ligula pellentesque curabitur, suspendisse adipiscing quisque sed luctus elementum in imperdiet id, praesent enim sem justo sapien diam nec. Quisque erat risus sagittis penatibus per, vehicula sociosqu cubilia convallis, sollicitudin scelerisque cras aptent. Natoque ornare dictumst netus litora mollis suspendisse cubilia proin morbi primis consequat eu massa, cursus non urna ridiculus dolor duis tempus ut nam velit lacus viverra. A interdum senectus eu mus leo aptent facilisi augue tristique ante purus condimentum pulvinar porta viverra morbi, et tellus gravida porttitor non euismod suscipit neque egestas praesent arcu luctus pharetra fusce. Luctus mauris a venenatis tempus cras ante efficitur massa ultricies mollis lacus, volutpat nisi lacinia himenaeos facilisi in aliquet sodales purus integer vitae quisque, libero torquent enim mattis placerat tortor mi dignissim viverra sem.
+    - name: echo2
+      cmd: echo
+      args:
+        - 'Hello World'
+      description: test script foobar
+    - name: activate-local
+      cmd: dart pub global activate --source path ./
+    - name: combined
+      cmd: echo 'test' && echo1 && echo2
+    - short: echo 'this is a short script'
 
 executables:
   scr: script_runner
