@@ -67,3 +67,14 @@ String wrap(String arg) {
   }
   return arg;
 }
+
+/// Tries a list of nullable [T]s until one is not null.
+/// Returns null if no actual value is found.
+T? firstNonNull<T>(Iterable<T?> list) {
+  for (final item in list) {
+    if (item != null) {
+      return item;
+    }
+  }
+  return null;
+}

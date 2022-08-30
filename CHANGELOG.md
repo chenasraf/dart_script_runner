@@ -1,3 +1,8 @@
+## 0.1.8
+
+- Improve platform shell detection
+- Update `-h` flag output
+
 ## 0.1.7
 
 - Fix error when not supplying shell in config

@@ -3,6 +3,7 @@ library script_runner;
 import 'dart:io';
 import 'dart:math' as math;
 import 'package:script_runner/src/runnable_script.dart';
+import 'package:script_runner/src/utils.dart';
 // ignore: no_leading_underscores_for_library_prefixes
 import 'utils.dart' as _utils;
 import 'package:yaml/yaml.dart' as yaml;
@@ -36,6 +37,9 @@ class ScriptRunnerConfig {
   /// The filesystem used for loading scripts.
   FileSystem? get fileSystem => _fileSystem;
 
+  /// The source file path of the config. Might be null if the config was created from the constructor manually.
+  String? configSource;
+
   /// Create a new script runner config from given arguments.
   /// Usually you would not want to call this, and instead load the config from a file using
   /// `ScriptRunnerConfig.get()`.
@@ -48,6 +52,7 @@ class ScriptRunnerConfig {
     this.env,
     FileSystem? fileSystem,
     this.lineLength = 80,
+    this.configSource,
   }) : _fileSystem = fileSystem ?? LocalFileSystem();
 
   /// A map of the registered scripts, keyed by name.
@@ -67,8 +72,13 @@ class ScriptRunnerConfig {
   /// If none are found, an Exception is thrown.
   static Future<ScriptRunnerConfig> get([FileSystem? fileSystem]) async {
     final fs = fileSystem ?? LocalFileSystem();
-    final source =
-        (await _getPubspecConfig(fs)) ?? (await _getCustomConfig(fs));
+    String configSource = path.join(fs.currentDirectory.path, 'pubspec.yaml');
+    var source = await _getPubspecConfig(fs);
+
+    if (source == null) {
+      source = await _getCustomConfig(fs);
+      configSource = path.join(fs.currentDirectory.path, 'script_runner.yaml');
+    }
 
     if (source == null) {
       throw StateError(
@@ -86,6 +96,7 @@ class ScriptRunnerConfig {
       workingDir: source['cwd'],
       fileSystem: fileSystem,
       lineLength: source['line_length'] ?? 80,
+      configSource: configSource,
     );
   }
 
@@ -146,9 +157,15 @@ class ScriptRunnerConfig {
     }
     final padLen = maxLen + 6;
     print('  ${'-h, --help'.padRight(padLen, ' ')} Print this help message\n');
+    print('');
+    print(
+      'Available scripts'
+      '${configSource?.isNotEmpty == true ? ' on $configSource:' : ':'}',
+    );
+    print('');
     for (final scr in scripts) {
       final lines = _utils.chunks(
-        scr.description ?? [scr.cmd, ...scr.args].join(' '),
+        scr.description ?? 'Run: ${[scr.cmd, ...scr.args].join(' ')}',
         80 - padLen,
       );
       print('  ${scr.name.padRight(padLen, ' ')} ${lines.first}');
@@ -200,7 +217,8 @@ class ScriptRunnerShellConfig {
     }
   }
 
-  /// Get the shell to use for the given platform.
+  /// Returns the shell for the current platform. If no overrides are specified in the config, it attempts to find
+  /// the default shell for the platform.
   String get shell => _getShell();
 
   String _getShell() {
@@ -219,8 +237,11 @@ class ScriptRunnerShellConfig {
       return 'cmd.exe';
     }
     try {
-      final res = Platform.environment['SHELL'];
-      return res ?? '/bin/sh';
+      final envShell = firstNonNull([
+        Platform.environment['SHELL'],
+        Platform.environment['TERM'],
+      ]);
+      return envShell ?? '/bin/sh';
     } catch (e) {
       return '/bin/sh';
     }
