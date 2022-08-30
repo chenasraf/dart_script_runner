@@ -98,8 +98,13 @@ class ScriptRunnerConfig {
     }
     final pubspec = await file.readAsString();
     final yaml.YamlMap contents = yaml.loadYaml(pubspec);
-    final yaml.YamlMap? conf = contents['script_runner'];
-    return conf;
+    try {
+      final yaml.YamlMap? conf = contents['script_runner'];
+      return conf;
+    } catch (e) {
+      throw StateError(
+          'Expected YamlMap in pubspec.yaml under script_runner key, got: ${contents['script_runner'].runtimeType}');
+    }
   }
 
   static Future<yaml.YamlMap?>? _getCustomConfig(FileSystem fileSystem) async {
@@ -110,8 +115,13 @@ class ScriptRunnerConfig {
       return null;
     }
     final pubspec = await file.readAsString();
-    final yaml.YamlMap? conf = yaml.loadYaml(pubspec);
-    return conf;
+    try {
+      final yaml.YamlMap? conf = yaml.loadYaml(pubspec);
+      return conf;
+    } catch (e) {
+      throw StateError(
+          'Expected YamlMap in pubspec.yaml under script_runner key, got: ${yaml.loadYaml(pubspec).runtimeType}');
+    }
   }
 
   static List<RunnableScript> _parseScriptsList(
@@ -166,20 +176,28 @@ class ScriptRunnerShellConfig {
     this.linux,
   });
 
-  /// Parses a shell configuration from a YAML map, dart map or string.
+  /// Parses a shell configuration from a [YamlMap], [Map] or [String].
+  /// Other types will throw a [StateError].
   factory ScriptRunnerShellConfig.parse(dynamic obj) {
-    if (obj is String) {
-      return ScriptRunnerShellConfig(defaultShell: obj);
+    try {
+      if (obj is String) {
+        return ScriptRunnerShellConfig(defaultShell: obj);
+      }
+      if (obj is yaml.YamlMap || obj is Map) {
+        return ScriptRunnerShellConfig(
+          defaultShell: obj['default'],
+          windows: obj['windows'],
+          macos: obj['macos'],
+          linux: obj['linux'],
+        );
+      }
+      if (obj == null) {
+        return ScriptRunnerShellConfig();
+      }
+      throw StateError('Invalid shell config: $obj');
+    } catch (e) {
+      throw StateError('Error while parsing config: $obj');
     }
-    if (obj is yaml.YamlMap || obj is Map) {
-      return ScriptRunnerShellConfig(
-        defaultShell: obj['default'],
-        windows: obj['windows'],
-        macos: obj['macos'],
-        linux: obj['linux'],
-      );
-    }
-    throw StateError('Invalid shell config: $obj');
   }
 
   /// Get the shell to use for the given platform.
@@ -200,6 +218,11 @@ class ScriptRunnerShellConfig {
     if (Platform.isWindows) {
       return 'cmd.exe';
     }
-    return '/bin/sh';
+    try {
+      final res = Platform.environment['SHELL'];
+      return res ?? '/bin/sh';
+    } catch (e) {
+      return '/bin/sh';
+    }
   }
 }

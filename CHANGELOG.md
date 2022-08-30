@@ -1,3 +1,8 @@
+## 0.1.7
+
+- Fix error when not supplying shell in config
+- Improve errors for bad configurations
+
 ## 0.1.6
 
 - Code improvements

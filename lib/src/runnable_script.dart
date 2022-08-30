@@ -66,8 +66,12 @@ class RunnableScript {
           (map['args'] as yaml.YamlList?)?.map((e) => e.toString()).toList();
       out['env'] = (map['env'] as yaml.YamlMap?)?.cast<String, String>();
     }
-
-    return RunnableScript.fromMap(out, fileSystem: fileSystem);
+    try {
+      return RunnableScript.fromMap(out, fileSystem: fileSystem);
+    } catch (e) {
+      throw StateError(
+          'Failed to parse script, arguments: $map, $fileSystem. Error: $e');
+    }
   }
 
   /// Generate a runnable script from a normal map as defined in the config.
@@ -81,13 +85,18 @@ class RunnableScript {
     final description = map['description'] as String?;
     // print('cmdArgs: $cmdArgs');
 
-    return RunnableScript(
-      name,
-      cmd: cmd,
-      args: cmdArgs + List<String>.from(rawArgs),
-      fileSystem: fileSystem,
-      description: description,
-    );
+    try {
+      return RunnableScript(
+        name,
+        cmd: cmd,
+        args: cmdArgs + List<String>.from(rawArgs),
+        fileSystem: fileSystem,
+        description: description,
+      );
+    } catch (e) {
+      throw StateError(
+          'Failed to parse script, arguments: $map, $fileSystem. Error: $e');
+    }
   }
 
   /// Runs the current script with the given extra arguments.
