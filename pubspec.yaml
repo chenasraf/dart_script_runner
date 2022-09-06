@@ -1,6 +1,6 @@
 name: script_runner
 description: Run all your project-related scripts in a portable, simple config.
-version: 0.1.8
+version: 0.1.9
 homepage: https://casraf.dev/
 repository: https://github.com/chenasraf/dart_script_runner
 license: MIT
@@ -21,7 +21,8 @@ script_runner:
   scripts:
     # Real
     - auto-fix: dart fix --apply
-    - publish: dart pub publish
+    - publish: dart pub publish --force
+    - publish:dry: dart pub publish --dry-run
     - doc: dart doc
 
     # Examples
@@ -33,6 +34,7 @@ script_runner:
       args:
         - 'Hello World'
       description: test script foobar
+      suppress_header_output: true
     - name: activate-local
       cmd: dart pub global activate --source path ./
     - name: combined

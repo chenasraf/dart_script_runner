@@ -120,6 +120,9 @@ script_runner:
       env:
         MY_ENV: my-value
         # ...
+      # Use to suppress the "Running: ..." output before running the command
+      # to make it possible to use ouput for other scripts
+      suppress_header_output: true
       # The script to run. You can supply the args directly here, or split into
       # `cmd` and `args` as a list.
       cmd: my_scr 'arg1'

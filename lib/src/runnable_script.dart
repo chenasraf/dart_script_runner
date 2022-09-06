@@ -38,6 +38,10 @@ class RunnableScript {
   /// The script loader pre-loads these as temporary aliases to allow combined scripts to be run.
   List<RunnableScript> preloadScripts = [];
 
+  /// When set to [true], the command will not print "Running: ...". This is useful for using the output in
+  /// other scripts.
+  final bool suppressHeaderOutput;
+
   FileSystem _fileSystem;
 
   /// A runnable script with pre-defined name, cmd and args. May be run using the `run` command and optionally
@@ -50,6 +54,7 @@ class RunnableScript {
     this.workingDir,
     this.env,
     FileSystem? fileSystem,
+    this.suppressHeaderOutput = false,
   }) : _fileSystem = fileSystem ?? LocalFileSystem();
 
   /// Generate a runnable script from a yaml loaded map as defined in the config.
@@ -75,14 +80,17 @@ class RunnableScript {
   }
 
   /// Generate a runnable script from a normal map as defined in the config.
-  factory RunnableScript.fromMap(Map<String, dynamic> map,
-      {FileSystem? fileSystem}) {
+  factory RunnableScript.fromMap(
+    Map<String, dynamic> map, {
+    FileSystem? fileSystem,
+  }) {
     final name = map['name'] as String;
     final rawCmd = map['cmd'] as String;
     final cmd = rawCmd.split(' ').first;
     final rawArgs = (map['args'] as List<String>?) ?? [];
     final cmdArgs = _utils.splitArgs(rawCmd.substring(cmd.length));
     final description = map['description'] as String?;
+    final suppressHeaderText = map['suppress_header_output'] as bool? ?? false;
     // print('cmdArgs: $cmdArgs');
 
     try {
@@ -92,6 +100,7 @@ class RunnableScript {
         args: cmdArgs + List<String>.from(rawArgs),
         fileSystem: fileSystem,
         description: description,
+        suppressHeaderOutput: suppressHeaderText,
       );
     } catch (e) {
       throw StateError(
@@ -112,7 +121,9 @@ class RunnableScript {
     final origCmd = [cmd, ...effectiveArgs.map(_utils.wrap)].join(' ');
     final passCmd = '$preRun; eval \'$origCmd\'';
 
-    print('Running: $origCmd');
+    if (!suppressHeaderOutput) {
+      print('Running: $origCmd');
+    }
     // print("Before parse $cmd $args");
 
     try {
