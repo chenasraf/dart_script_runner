@@ -37,6 +37,8 @@ script_runner:
       suppress_header_output: true
     - name: activate-local
       cmd: dart pub global activate --source path ./
+    - name: activate-global
+      cmd: dart pub global activate script_runner
     - name: combined
       cmd: echo 'test' && echo1 && echo2
     - short: echo 'this is a short script'
