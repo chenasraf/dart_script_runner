@@ -39,6 +39,24 @@ void main() {
         expect(testScr.args, ['hello']);
       });
     });
+
+    group('search up directories', () {
+      setUp(() async {
+        fs = MemoryFileSystem();
+        await _writePubspec(fs);
+        var tmpDir = fs.directory(path.join(fs.currentDirectory.path, 'test'));
+        tmpDir.createSync();
+        fs.currentDirectory = tmpDir;
+      });
+
+      test('works', () async {
+        final conf = await ScriptRunnerConfig.get(fs);
+        final testScr = conf.scriptsMap['test']!;
+        expect(testScr.name, 'test');
+        expect(testScr.cmd, 'echo');
+        expect(testScr.args, ['hello']);
+      });
+    });
   });
 
   group('ScriptRunnerShellConfig', () {

@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:math' as math;
 import 'package:script_runner/src/runnable_script.dart';
 import 'package:script_runner/src/utils.dart';
+import 'package:yaml/yaml.dart';
 // ignore: no_leading_underscores_for_library_prefixes
 import 'utils.dart' as _utils;
 import 'package:yaml/yaml.dart' as yaml;
@@ -72,18 +73,17 @@ class ScriptRunnerConfig {
   /// If none are found, an Exception is thrown.
   static Future<ScriptRunnerConfig> get([FileSystem? fileSystem]) async {
     final fs = fileSystem ?? LocalFileSystem();
-    String configSource = path.join(fs.currentDirectory.path, 'pubspec.yaml');
-    var source = await _getPubspecConfig(fs);
+    final startDir = fs.currentDirectory.path;
 
-    if (source == null) {
-      source = await _getCustomConfig(fs);
-      configSource = path.join(fs.currentDirectory.path, 'script_runner.yaml');
-    }
+    final sourceMap = await _tryFindConfig(fs, startDir);
 
-    if (source == null) {
+    if (sourceMap.isEmpty) {
       throw StateError(
           'Must provide scripts in either pubspec.yaml or script_runner.yaml');
     }
+
+    final source = sourceMap.values.first;
+    final configSource = sourceMap.keys.first;
 
     final env = <String, String>{}..addAll(
         (source['env'] as yaml.YamlMap?)?.cast<String, String>() ?? {},
@@ -100,9 +100,9 @@ class ScriptRunnerConfig {
     );
   }
 
-  static Future<yaml.YamlMap?> _getPubspecConfig(FileSystem fileSystem) async {
-    final filePath =
-        path.join(fileSystem.currentDirectory.path, 'pubspec.yaml');
+  static Future<yaml.YamlMap?> _getPubspecConfig(
+      FileSystem fileSystem, String folderPath) async {
+    final filePath = path.join(folderPath, 'pubspec.yaml');
     final file = fileSystem.file(filePath);
     if (!file.existsSync()) {
       return null;
@@ -118,9 +118,9 @@ class ScriptRunnerConfig {
     }
   }
 
-  static Future<yaml.YamlMap?>? _getCustomConfig(FileSystem fileSystem) async {
-    final filePath =
-        path.join(fileSystem.currentDirectory.path, 'script_runner.yaml');
+  static Future<yaml.YamlMap?>? _getCustomConfig(
+      FileSystem fileSystem, String folderPath) async {
+    final filePath = path.join(folderPath, 'script_runner.yaml');
     final file = fileSystem.file(filePath);
     if (!file.existsSync()) {
       return null;
@@ -174,6 +174,34 @@ class ScriptRunnerConfig {
       }
       print('');
     }
+  }
+
+  static Future<Map<String, yaml.YamlMap>> _tryFindConfig(
+      FileSystem fs, String startDir) async {
+    var dir = fs.directory(startDir);
+    String sourceFile;
+    YamlMap? source;
+    bool rootSearched = false;
+    while (!rootSearched) {
+      if (dir.parent.path == dir.path) {
+        rootSearched = true;
+      }
+      source = await _getPubspecConfig(fs, dir.path);
+      sourceFile = path.join(dir.path, 'pubspec.yaml');
+
+      if (source == null) {
+        source = await _getCustomConfig(fs, dir.path);
+        sourceFile = path.join(dir.path, 'script_runner.yaml');
+        if (source == null) {
+          dir = dir.parent;
+          continue;
+        }
+      }
+
+      return {sourceFile: source};
+    }
+
+    return {};
   }
 }
 

@@ -1,3 +1,7 @@
+## 0.2.0
+
+- Search up all directories while searching for config
+
 ## 0.1.9
 
 - Add `suppress_header_output` option to allow scripts to output easily to other scripts
