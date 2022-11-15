@@ -248,30 +248,63 @@ class ScriptRunnerShellConfig {
   /// Returns the shell for the current platform. If no overrides are specified in the config, it attempts to find
   /// the default shell for the platform.
   String get shell => _getShell();
+  String get shellExecFlag => _getShellExecFlag();
 
   String _getShell() {
-    if (Platform.isWindows) {
-      return windows ?? defaultShell ?? _osShell();
-    } else if (Platform.isMacOS) {
-      return macos ?? defaultShell ?? _osShell();
-    } else if (Platform.isLinux) {
-      return linux ?? defaultShell ?? _osShell();
+    switch (os) {
+      case OS.windows:
+        return windows ?? defaultShell ?? _osShell();
+      case OS.macos:
+        return macos ?? defaultShell ?? _osShell();
+      case OS.linux:
+        return linux ?? defaultShell ?? _osShell();
     }
-    return defaultShell ?? _osShell();
+  }
+
+  String _getShellExecFlag() {
+    switch (os) {
+      case OS.windows:
+        return '/K';
+      case OS.macos:
+      case OS.linux:
+        return '-c';
+    }
+  }
+
+  OS get os {
+    if (Platform.isWindows) {
+      return OS.windows;
+    } else if (Platform.isMacOS) {
+      return OS.macos;
+    } else if (Platform.isLinux) {
+      return OS.linux;
+    }
+    throw StateError('Unsupported OS: ${Platform.operatingSystem}');
+    // return OS.unknown;
   }
 
   String _osShell() {
-    if (Platform.isWindows) {
-      return 'cmd.exe';
-    }
-    try {
-      final envShell = firstNonNull([
-        Platform.environment['SHELL'],
-        Platform.environment['TERM'],
-      ]);
-      return envShell ?? '/bin/sh';
-    } catch (e) {
-      return '/bin/sh';
+    switch (os) {
+      case OS.windows:
+        return 'cmd.exe';
+      case OS.linux:
+      case OS.macos:
+        try {
+          final envShell = firstNonNull([
+            Platform.environment['SHELL'],
+            Platform.environment['TERM'],
+          ]);
+          return envShell ?? '/bin/sh';
+        } catch (e) {
+          return '/bin/sh';
+        }
     }
   }
+}
+
+enum OS {
+  windows,
+  macos,
+  linux,
+  // other
 }

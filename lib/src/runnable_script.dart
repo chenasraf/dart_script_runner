@@ -111,38 +111,26 @@ class RunnableScript {
   /// Runs the current script with the given extra arguments.
   Future<dynamic> run(List<String> extraArgs) async {
     final effectiveArgs = args + extraArgs;
-    // final argsStr = effectiveArgs.map(_wrap).join(' ');
-    var config = await ScriptRunnerConfig.get(_fileSystem);
-    final shell = config.shell.shell;
+    final config = await ScriptRunnerConfig.get(_fileSystem);
 
-    final preRun = preloadScripts
-        .map((d) => 'alias ${d.name}=\'scr ${d.name}\'')
-        .join(';');
+    final scrContents = _getScriptContents(config, extraArgs: extraArgs);
+    final scrPath = _getScriptPath();
+
+    await _fileSystem.file(scrPath).writeAsString(scrContents);
+
+    if (config.shell.os != OS.windows) {
+      final result = await io.Process.run("chmod", ["u+x", scrPath]);
+      if (result.exitCode != 0) throw Exception(result.stderr);
+    }
+
     final origCmd = [cmd, ...effectiveArgs.map(_utils.wrap)].join(' ');
-    final passCmd = '$preRun; eval \'$origCmd\'';
 
     if (!suppressHeaderOutput) {
       print('Running: $origCmd');
     }
-    // print("Before parse $cmd $args");
 
     try {
-      final result = await io.Process.start(
-        shell,
-        [
-          '-c',
-          passCmd,
-        ],
-        environment: {...?config.env, ...?env},
-        workingDirectory: workingDir ?? config.workingDir,
-      );
-      result.stdout.listen((event) {
-        io.stdout.write(Utf8Decoder().convert(event));
-      });
-      result.stderr.listen((event) {
-        io.stdout.write(Utf8Decoder().convert(event));
-      });
-      final exitCode = await result.exitCode;
+      final exitCode = await _runShellScriptFile(config, scrPath);
       print('');
       if (exitCode != 0) {
         final e = io.ProcessException(
@@ -151,6 +139,47 @@ class RunnableScript {
       }
     } catch (e) {
       rethrow;
+    } finally {
+      await _fileSystem.file(scrPath).delete();
+    }
+  }
+
+  Future<int> _runShellScriptFile(ScriptRunnerConfig config, scrPath) async {
+    final result = await io.Process.start(
+      config.shell.shell,
+      [config.shell.shellExecFlag, scrPath],
+      environment: {...?config.env, ...?env},
+      workingDirectory: workingDir ?? config.workingDir,
+    );
+    result.stdout.listen((event) {
+      io.stdout.write(Utf8Decoder().convert(event));
+    });
+    result.stderr.listen((event) {
+      io.stdout.write(Utf8Decoder().convert(event));
+    });
+    final exitCode = await result.exitCode;
+    return exitCode;
+  }
+
+  String _getScriptPath() => _fileSystem.path
+      .join(_fileSystem.systemTempDirectory.path, 'script_runner_$name.sh');
+
+  String _getScriptContents(ScriptRunnerConfig config,
+      {List<String> extraArgs = const []}) {
+    final script = "$cmd ${(args + extraArgs).map(_utils.wrap).join(' ')}";
+    switch (config.shell.os) {
+      case OS.windows:
+        return [
+          "@echo off",
+          ...preloadScripts.map((e) => 'doskey ${e.name} = "scr ${e.name}"'),
+          script,
+        ].join('\n');
+      case OS.linux:
+      case OS.macos:
+        return [
+          ...preloadScripts.map((e) => "alias ${e.name}='scr ${e.name}'"),
+          script
+        ].join('\n');
     }
   }
 }

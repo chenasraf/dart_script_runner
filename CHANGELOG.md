@@ -1,3 +1,8 @@
+## 0.2.1
+
+- Windows shell support (experimental)
+- Use temporary script file to run commands
+
 ## 0.2.0
 
 - Search up all directories while searching for config
