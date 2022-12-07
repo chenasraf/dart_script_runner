@@ -1,4 +1,4 @@
-## 0.2.2
+## 0.3.1
 
 - Add `appendNewLine` option (default: `false`)
 
