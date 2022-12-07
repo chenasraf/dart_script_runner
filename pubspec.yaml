@@ -1,6 +1,6 @@
 name: script_runner
 description: Run all your project-related scripts in a portable, simple config.
-version: 0.2.1
+version: 0.3.0
 homepage: https://casraf.dev/
 repository: https://github.com/chenasraf/dart_script_runner
 license: MIT
@@ -13,8 +13,9 @@ dependencies:
   yaml: ^3.1.1
 
 dev_dependencies:
-  lints: ^2.0.0
-  test: ^1.16.0
+  lints:
+  test:
+  btool:
 
 script_runner:
   # line_length: 100
@@ -24,6 +25,12 @@ script_runner:
     - publish: dart pub publish --force
     - publish:dry: dart pub publish --dry-run
     - doc: dart doc
+    - name: 'version'
+      cmd: dart run btool get packageVersion
+      suppress_header_output: true
+    - name: 'version:set'
+      cmd: dart run btool set packageVersion
+      suppress_header_output: true
 
     # Examples
     - name: echo1

@@ -1,3 +1,7 @@
+## 0.2.2
+
+- Add `appendNewLine` option (default: `false`)
+
 ## 0.2.1
 
 - Windows shell support (experimental)

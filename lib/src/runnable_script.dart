@@ -40,7 +40,14 @@ class RunnableScript {
 
   /// When set to [true], the command will not print "Running: ...". This is useful for using the output in
   /// other scripts.
+  ///
+  /// Defaults to [false].
   final bool suppressHeaderOutput;
+
+  /// When set to [true], the command will end with a newline. This is useful for using the output in other scripts.
+  ///
+  /// Defaults to [false].
+  final bool appendNewline;
 
   FileSystem _fileSystem;
 
@@ -55,6 +62,7 @@ class RunnableScript {
     this.env,
     FileSystem? fileSystem,
     this.suppressHeaderOutput = false,
+    this.appendNewline = false,
   }) : _fileSystem = fileSystem ?? LocalFileSystem();
 
   /// Generate a runnable script from a yaml loaded map as defined in the config.
@@ -91,6 +99,7 @@ class RunnableScript {
     final cmdArgs = _utils.splitArgs(rawCmd.substring(cmd.length));
     final description = map['description'] as String?;
     final suppressHeaderText = map['suppress_header_output'] as bool? ?? false;
+    final appendNewline = map['append_newline'] as bool? ?? false;
     // print('cmdArgs: $cmdArgs');
 
     try {
@@ -101,6 +110,7 @@ class RunnableScript {
         fileSystem: fileSystem,
         description: description,
         suppressHeaderOutput: suppressHeaderText,
+        appendNewline: appendNewline,
       );
     } catch (e) {
       throw StateError(
@@ -131,7 +141,9 @@ class RunnableScript {
 
     try {
       final exitCode = await _runShellScriptFile(config, scrPath);
-      print('');
+      if (appendNewline) {
+        print('');
+      }
       if (exitCode != 0) {
         final e = io.ProcessException(
             cmd, args, 'Process exited with error code: $exitCode', exitCode);
