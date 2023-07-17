@@ -7,9 +7,12 @@ name: Dart
 
 on:
   push:
-    branches: [ "master" ]
+    branches: ['master']
   pull_request:
-    branches: [ "master" ]
+    branches: ['master']
+
+env:
+  SHELL: '/bin/sh'
 
 jobs:
   build:
