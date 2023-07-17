@@ -136,7 +136,7 @@ class RunnableScript {
     final origCmd = [cmd, ...effectiveArgs.map(_utils.wrap)].join(' ');
 
     if (!suppressHeaderOutput) {
-      print('Running: $origCmd');
+      print('\$ $origCmd');
     }
 
     try {

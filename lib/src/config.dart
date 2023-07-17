@@ -19,15 +19,14 @@ class ScriptRunnerConfig {
 
   /// The shell to use for running scripts. You may provide any executable path here.
   ///
-  /// Shell will be run with the commands with `[shell] -c '...'`.
+  /// Shell will be run with the commands with `[shell] -c '...'` (Linux/macOS) or `[shell] /K '...'` (Windows).
   final ScriptRunnerShellConfig shell;
 
   /// The default working directory for the scripts to run in.
   /// If left `null`, defaults to current directory.
   final String? workingDir;
 
-  /// Map of override environment variables for the scripts to run in.
-  /// If left `null`, defaults to no overrides.
+  /// Map of optional override environment variables for the scripts to run in.
   final Map<String, String>? env;
 
   /// The length of the lines in the help description, which causes text overflowing to the next line when necessary.
@@ -165,7 +164,7 @@ class ScriptRunnerConfig {
     print('');
     for (final scr in scripts) {
       final lines = _utils.chunks(
-        scr.description ?? 'Run: ${[scr.cmd, ...scr.args].join(' ')}',
+        scr.description ?? '\$ ${[scr.cmd, ...scr.args].join(' ')}',
         80 - padLen,
       );
       print('  ${scr.name.padRight(padLen, ' ')} ${lines.first}');
@@ -248,6 +247,8 @@ class ScriptRunnerShellConfig {
   /// Returns the shell for the current platform. If no overrides are specified in the config, it attempts to find
   /// the default shell for the platform.
   String get shell => _getShell();
+
+  /// Returns the shell command-line flag to indicate incoming command
   String get shellExecFlag => _getShellExecFlag();
 
   String _getShell() {
@@ -271,6 +272,7 @@ class ScriptRunnerShellConfig {
     }
   }
 
+  /// The current OS of the system, of those supported by [ScriptRunner]
   OS get os {
     if (Platform.isWindows) {
       return OS.windows;
