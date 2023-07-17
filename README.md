@@ -23,6 +23,10 @@ in a portable, simple config.
 You might use it to chain multiple commands into a unified build process, format and lint your
 documents, or more.
 
+The advantage over make is that this is auto documented, and will automatically load your scripts
+from the directory that contains `pubspec.yaml`, instead of having to find the root project dirctory
+manually.
+
 This project was developed with inspiration from NPM's `scripts` inside `package.json` and is meant
 to work similarly, though it can be customized to fit your needs more specifically.
 
