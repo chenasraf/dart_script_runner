@@ -25,7 +25,7 @@ script_runner:
     - publish: dart pub publish --force
     - publish:dry: dart pub publish --dry-run
     - doc: dart doc
-    - name: 'version'
+    - name: version
       cmd: dart run btool get packageVersion
       suppress_header_output: true
     - name: 'version:set'
