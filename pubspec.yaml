@@ -1,11 +1,11 @@
 name: script_runner
 description: Run all your project-related scripts in a portable, simple config.
-version: 0.3.1
+version: 0.3.2
 homepage: https://casraf.dev/
 repository: https://github.com/chenasraf/dart_script_runner
 license: MIT
 environment:
-  sdk: '>=2.17.0 <3.0.0'
+  sdk: '>=2.17.0 <4.0.0'
 
 dependencies:
   file: ^6.1.2
@@ -16,6 +16,7 @@ dev_dependencies:
   lints:
   test:
   btool:
+
 
 script_runner:
   # line_length: 100
