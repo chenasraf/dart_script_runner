@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io' as io;
 
 import 'package:file/file.dart';
@@ -146,29 +145,30 @@ class RunnableScript {
       }
       if (exitCode != 0) {
         final e = io.ProcessException(
-            cmd, args, 'Process exited with error code: $exitCode', exitCode);
+          cmd,
+          args,
+          'Process exited with error code: $exitCode',
+          exitCode,
+        );
         throw e;
       }
-    } catch (e) {
-      rethrow;
     } finally {
       await _fileSystem.file(scrPath).delete();
     }
   }
 
-  Future<int> _runShellScriptFile(ScriptRunnerConfig config, scrPath) async {
+  Future<int> _runShellScriptFile(
+    ScriptRunnerConfig config,
+    String scrPath,
+  ) async {
     final result = await io.Process.start(
       config.shell.shell,
       [config.shell.shellExecFlag, scrPath],
       environment: {...?config.env, ...?env},
       workingDirectory: workingDir ?? config.workingDir,
+      mode: io.ProcessStartMode.inheritStdio,
+      includeParentEnvironment: true,
     );
-    result.stdout.listen((event) {
-      io.stdout.write(Utf8Decoder().convert(event));
-    });
-    result.stderr.listen((event) {
-      io.stdout.write(Utf8Decoder().convert(event));
-    });
     final exitCode = await result.exitCode;
     return exitCode;
   }
@@ -176,8 +176,10 @@ class RunnableScript {
   String _getScriptPath() => _fileSystem.path
       .join(_fileSystem.systemTempDirectory.path, 'script_runner_$name.sh');
 
-  String _getScriptContents(ScriptRunnerConfig config,
-      {List<String> extraArgs = const []}) {
+  String _getScriptContents(
+    ScriptRunnerConfig config, {
+    List<String> extraArgs = const [],
+  }) {
     final script = "$cmd ${(args + extraArgs).map(_utils.wrap).join(' ')}";
     switch (config.shell.os) {
       case OS.windows:
@@ -189,9 +191,11 @@ class RunnableScript {
       case OS.linux:
       case OS.macos:
         return [
-          ...preloadScripts.map((e) => "alias ${e.name}='scr ${e.name}'"),
+          ...preloadScripts.map((e) =>
+              "[[ ! \$(which ${e.name}) ]] && alias ${e.name}='scr ${e.name}'"),
           script
         ].join('\n');
     }
   }
 }
+

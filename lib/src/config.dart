@@ -2,15 +2,14 @@ library script_runner;
 
 import 'dart:io';
 import 'dart:math' as math;
-import 'package:script_runner/src/runnable_script.dart';
-import 'package:script_runner/src/utils.dart';
-import 'package:yaml/yaml.dart';
-// ignore: no_leading_underscores_for_library_prefixes
-import 'utils.dart' as _utils;
-import 'package:yaml/yaml.dart' as yaml;
-import 'package:path/path.dart' as path;
+
 import 'package:file/file.dart';
 import 'package:file/local.dart';
+import 'package:path/path.dart' as path;
+import 'package:yaml/yaml.dart' as yaml;
+
+import 'runnable_script.dart';
+import 'utils.dart' as utils;
 
 /// The configuration for a script runner. See each field's documentation for more information.
 class ScriptRunnerConfig {
@@ -163,7 +162,7 @@ class ScriptRunnerConfig {
     );
     print('');
     for (final scr in scripts) {
-      final lines = _utils.chunks(
+      final lines = utils.chunks(
         scr.description ?? '\$ ${[scr.cmd, ...scr.args].join(' ')}',
         80 - padLen,
       );
@@ -179,7 +178,7 @@ class ScriptRunnerConfig {
       FileSystem fs, String startDir) async {
     var dir = fs.directory(startDir);
     String sourceFile;
-    YamlMap? source;
+    yaml.YamlMap? source;
     bool rootSearched = false;
     while (!rootSearched) {
       if (dir.parent.path == dir.path) {
@@ -292,7 +291,7 @@ class ScriptRunnerShellConfig {
       case OS.linux:
       case OS.macos:
         try {
-          final envShell = firstNonNull([
+          final envShell = utils.firstNonNull([
             Platform.environment['SHELL'],
             Platform.environment['TERM'],
           ]);
@@ -310,3 +309,4 @@ enum OS {
   linux,
   // other
 }
+

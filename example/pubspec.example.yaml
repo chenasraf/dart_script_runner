@@ -10,3 +10,12 @@ script_runner:
       cmd: flutter build ipa
     - name: build:all
       cmd: build:apk && build:ipa
+    - name: push:apk
+      suppress_header_output: true
+      cmd: |-
+        name=$(dart run btool get packageName)
+        version=$(dart run btool get packageVersion)
+        source="$(pwd)/build/app/outputs/flutter-apk/app-release.apk"
+        target="/sdcard/Download/$name-$version.apk"
+        echo "adb push $source $target"
+        adb push $source $target

@@ -31,6 +31,7 @@ script_runner:
     - name: 'version:set'
       cmd: dart run btool set packageVersion
       suppress_header_output: true
+    - format: dart format .
 
     # Examples
     - name: echo1

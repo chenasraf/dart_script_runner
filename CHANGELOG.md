@@ -1,3 +1,7 @@
+## 0.3.2
+
+- Improve I/O pass-through to commands
+
 ## 0.3.1
 
 - Add `appendNewLine` option (default: `false`)
