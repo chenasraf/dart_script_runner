@@ -1,3 +1,7 @@
+## 0.4.0
+
+- Colorized help output
+
 ## 0.3.2
 
 - Improve I/O pass-through to commands

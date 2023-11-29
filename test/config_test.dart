@@ -144,8 +144,7 @@ void main() {
 }
 
 Future<void> _writeCustomConf(FileSystem fs, [String? contents]) async {
-  final pubFile =
-      fs.file(path.join(fs.currentDirectory.path, 'script_runner.yaml'));
+  final pubFile = fs.file(path.join(fs.currentDirectory.path, 'script_runner.yaml'));
   pubFile.create(recursive: true);
   await pubFile.writeAsString(
     contents ??

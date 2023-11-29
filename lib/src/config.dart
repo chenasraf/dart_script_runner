@@ -9,7 +9,7 @@ import 'package:path/path.dart' as path;
 import 'package:yaml/yaml.dart' as yaml;
 
 import 'runnable_script.dart';
-import 'utils.dart' as utils;
+import 'utils.dart';
 
 /// The configuration for a script runner. See each field's documentation for more information.
 class ScriptRunnerConfig {
@@ -76,8 +76,7 @@ class ScriptRunnerConfig {
     final sourceMap = await _tryFindConfig(fs, startDir);
 
     if (sourceMap.isEmpty) {
-      throw StateError(
-          'Must provide scripts in either pubspec.yaml or script_runner.yaml');
+      throw StateError('Must provide scripts in either pubspec.yaml or script_runner.yaml');
     }
 
     final source = sourceMap.values.first;
@@ -98,8 +97,7 @@ class ScriptRunnerConfig {
     );
   }
 
-  static Future<yaml.YamlMap?> _getPubspecConfig(
-      FileSystem fileSystem, String folderPath) async {
+  static Future<yaml.YamlMap?> _getPubspecConfig(FileSystem fileSystem, String folderPath) async {
     final filePath = path.join(folderPath, 'pubspec.yaml');
     final file = fileSystem.file(filePath);
     if (!file.existsSync()) {
@@ -116,8 +114,7 @@ class ScriptRunnerConfig {
     }
   }
 
-  static Future<yaml.YamlMap?>? _getCustomConfig(
-      FileSystem fileSystem, String folderPath) async {
+  static Future<yaml.YamlMap?>? _getCustomConfig(FileSystem fileSystem, String folderPath) async {
     final filePath = path.join(folderPath, 'script_runner.yaml');
     final file = fileSystem.file(filePath);
     if (!file.existsSync()) {
@@ -137,36 +134,66 @@ class ScriptRunnerConfig {
     yaml.YamlList scriptsRaw, {
     FileSystem? fileSystem,
   }) {
-    final scripts = scriptsRaw
-        .map((script) =>
-            RunnableScript.fromYamlMap(script, fileSystem: fileSystem))
-        .toList();
+    final scripts = scriptsRaw.map((script) => RunnableScript.fromYamlMap(script, fileSystem: fileSystem)).toList();
     return scripts.map((s) => s..preloadScripts = scripts).toList();
   }
 
   /// Prints usage help text for this config
   void printUsage() {
-    print('Dart Script Runner');
-    print('  Usage: scr script_name ...args');
     print('');
-    var maxLen = 0;
+    print(
+      [
+        colorize('Usage:', [TerminalColor.bold]),
+        colorize('scr', [TerminalColor.yellow]),
+        colorize('<script_name>', [TerminalColor.brightWhite]),
+        colorize('[...args]', [TerminalColor.gray]),
+      ].join(' '),
+    );
+    print(
+      [
+        ' ' * 'Usage:'.length,
+        colorize('scr', [TerminalColor.yellow]),
+        colorize('-h', [TerminalColor.brightWhite]),
+      ].join(' '),
+    );
+    print('');
+    final titleStyle = [TerminalColor.bold, TerminalColor.brightWhite];
+    printColor('Built-in flags:', titleStyle);
+    print('');
+    var maxLen = '-h, --help'.length;
     for (final scr in scripts) {
       maxLen = math.max(maxLen, scr.name.length);
     }
     final padLen = maxLen + 6;
-    print('  ${'-h, --help'.padRight(padLen, ' ')} Print this help message\n');
+    print('  ${colorize('-h, --help'.padRight(padLen, ' '), [
+          TerminalColor.yellow
+        ])} ${colorize('Print this help message', [TerminalColor.gray])}');
     print('');
+
     print(
-      'Available scripts'
-      '${configSource?.isNotEmpty == true ? ' on $configSource:' : ':'}',
+      [
+        colorize('Available scripts', [
+          TerminalColor.bold,
+          TerminalColor.brightWhite,
+        ]),
+        (configSource?.isNotEmpty == true
+            ? [
+                colorize(' on ', titleStyle),
+                colorize(configSource!, [...titleStyle, TerminalColor.underline]),
+                colorize(':', titleStyle)
+              ].join('')
+            : ':'),
+      ].join(''),
     );
     print('');
     for (final scr in scripts) {
-      final lines = utils.chunks(
+      final lines = chunks(
         scr.description ?? '\$ ${[scr.cmd, ...scr.args].join(' ')}',
-        80 - padLen,
+        lineLength - padLen,
+        stripColors: true,
+        wrapLine: (line) => colorize(line, [TerminalColor.gray]),
       );
-      print('  ${scr.name.padRight(padLen, ' ')} ${lines.first}');
+      printColor('  ${scr.name.padRight(padLen, ' ')} ${lines.first}', [TerminalColor.yellow]);
       for (final line in lines.sublist(1)) {
         print('  ${''.padRight(padLen, ' ')} $line');
       }
@@ -174,8 +201,7 @@ class ScriptRunnerConfig {
     }
   }
 
-  static Future<Map<String, yaml.YamlMap>> _tryFindConfig(
-      FileSystem fs, String startDir) async {
+  static Future<Map<String, yaml.YamlMap>> _tryFindConfig(FileSystem fs, String startDir) async {
     var dir = fs.directory(startDir);
     String sourceFile;
     yaml.YamlMap? source;
@@ -291,7 +317,7 @@ class ScriptRunnerShellConfig {
       case OS.linux:
       case OS.macos:
         try {
-          final envShell = utils.firstNonNull([
+          final envShell = firstNonNull([
             Platform.environment['SHELL'],
             Platform.environment['TERM'],
           ]);
@@ -309,4 +335,3 @@ enum OS {
   linux,
   // other
 }
-
