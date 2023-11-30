@@ -8,7 +8,7 @@ environment:
   sdk: '>=2.17.0 <4.0.0'
 
 dependencies:
-  file: ^6.1.2
+  file: ^7.0.0
   path: ^1.8.2
   yaml: ^3.1.1
 
