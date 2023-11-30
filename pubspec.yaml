@@ -50,6 +50,13 @@ script_runner:
     - name: combined
       cmd: echo 'test' && echo1 && echo2
     - short: echo 'this is a short script'
+    - name: error
+      cmd: |-
+        _fn() {
+          return 1
+        }
+        _fn
+      description: imitate error
 
 executables:
   scr: script_runner

@@ -65,7 +65,8 @@ class RunnableScript {
   }) : _fileSystem = fileSystem ?? LocalFileSystem();
 
   /// Generate a runnable script from a yaml loaded map as defined in the config.
-  factory RunnableScript.fromYamlMap(yaml.YamlMap map, {FileSystem? fileSystem}) {
+  factory RunnableScript.fromYamlMap(yaml.YamlMap map,
+      {FileSystem? fileSystem}) {
     final out = <String, dynamic>{};
 
     if (map['name'] == null && map.keys.length == 1) {
@@ -73,13 +74,15 @@ class RunnableScript {
       out['cmd'] = map.values.first;
     } else {
       out.addAll(map.cast<String, dynamic>());
-      out['args'] = (map['args'] as yaml.YamlList?)?.map((e) => e.toString()).toList();
+      out['args'] =
+          (map['args'] as yaml.YamlList?)?.map((e) => e.toString()).toList();
       out['env'] = (map['env'] as yaml.YamlMap?)?.cast<String, String>();
     }
     try {
       return RunnableScript.fromMap(out, fileSystem: fileSystem);
     } catch (e) {
-      throw StateError('Failed to parse script, arguments: $map, $fileSystem. Error: $e');
+      throw StateError(
+          'Failed to parse script, arguments: $map, $fileSystem. Error: $e');
     }
   }
 
@@ -109,7 +112,8 @@ class RunnableScript {
         appendNewline: appendNewline,
       );
     } catch (e) {
-      throw StateError('Failed to parse script, arguments: $map, $fileSystem. Error: $e');
+      throw StateError(
+          'Failed to parse script, arguments: $map, $fileSystem. Error: $e');
     }
   }
 
@@ -148,6 +152,8 @@ class RunnableScript {
         );
         throw e;
       }
+    } catch (e) {
+      rethrow;
     } finally {
       await _fileSystem.file(scrPath).delete();
     }
@@ -169,7 +175,8 @@ class RunnableScript {
     return exitCode;
   }
 
-  String _getScriptPath() => _fileSystem.path.join(_fileSystem.systemTempDirectory.path, 'script_runner_$name.sh');
+  String _getScriptPath() => _fileSystem.path
+      .join(_fileSystem.systemTempDirectory.path, 'script_runner_$name.sh');
 
   String _getScriptContents(
     ScriptRunnerConfig config, {
@@ -185,8 +192,12 @@ class RunnableScript {
         ].join('\n');
       case OS.linux:
       case OS.macos:
-        return [...preloadScripts.map((e) => "[[ ! \$(which ${e.name}) ]] && alias ${e.name}='scr ${e.name}'"), script]
-            .join('\n');
+        return [
+          ...preloadScripts.map((e) =>
+              "[[ ! \$(which ${e.name}) ]] && alias ${e.name}='scr ${e.name}'"),
+          script
+        ].join('\n');
     }
   }
 }
+

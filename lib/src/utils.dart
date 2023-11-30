@@ -60,6 +60,13 @@ List<String> chunks(
   final chunks = <String>[];
   var chunk = '';
   for (final word in words) {
+    // if (chunk.contains('\n')) {
+    //   final lines = chunk.split('\n');
+    //   for (var i = 0; i < lines.length - 1; i++) {
+    //     chunks.add(wrapLine(lines[i]));
+    //   }
+    //   chunk = '';
+    // }
     final chunkLength = stripColors ? stripColor(chunk).length : chunk.length;
     final wordLength = stripColors ? stripColor(word).length : word.length;
     if (chunkLength + wordLength > maxLen) {
@@ -127,3 +134,4 @@ class TerminalColor {
   static const TerminalColor bold = TerminalColor._(1);
   static const TerminalColor underline = TerminalColor._(4);
 }
+
