@@ -6,10 +6,8 @@ Future<void> main(List<String> args) async {
   final scriptCmd = args.first;
   final scriptArgs = args.sublist(1);
   try {
-    print('Running script: $scriptCmd $scriptArgs');
     await runScript(scriptCmd, scriptArgs);
   } catch (e) {
     printColor('$e', [TerminalColor.red]);
   }
 }
-
