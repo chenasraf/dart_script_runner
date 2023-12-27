@@ -90,9 +90,8 @@ class RunnableScript {
   }) {
     final name = map['name'] as String;
     final rawCmd = map['cmd'] as String;
-    final cmd = rawCmd.split(' ').first;
+    final cmd = rawCmd;
     final rawArgs = (map['args'] as List<String>?) ?? [];
-    final cmdArgs = _utils.splitArgs(rawCmd.substring(cmd.length));
     final description = map['description'] as String?;
     final suppressHeaderText = map['suppress_header_output'] as bool? ?? false;
     final appendNewline = map['append_newline'] as bool? ?? false;
@@ -102,7 +101,7 @@ class RunnableScript {
       return RunnableScript(
         name,
         cmd: cmd,
-        args: cmdArgs + List<String>.from(rawArgs),
+        args: List<String>.from(rawArgs),
         fileSystem: fileSystem,
         description: description,
         suppressHeaderOutput: suppressHeaderText,

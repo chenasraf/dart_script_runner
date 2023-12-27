@@ -1,3 +1,16 @@
+## 0.5.1
+
+- Fix bad command spliting in some cases
+- Less restrictive dependencies (compatible with Flutter stable)
+
+## 0.5.1
+
+- Use unlocked dependencies
+
+## 0.5.0
+
+- Updated dependencies
+
 ## 0.4.0
 
 - Colorized help output
