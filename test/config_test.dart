@@ -20,8 +20,8 @@ void main() {
         final conf = await ScriptRunnerConfig.get(fs);
         final testScr = conf.scriptsMap['test']!;
         expect(testScr.name, 'test');
-        expect(testScr.cmd, 'echo');
-        expect(testScr.args, ['hello']);
+        expect(testScr.cmd, 'echo "hello"');
+        expect(testScr.args, []);
       });
     });
 
@@ -35,8 +35,8 @@ void main() {
         final conf = await ScriptRunnerConfig.get(fs);
         final testScr = conf.scriptsMap['test']!;
         expect(testScr.name, 'test');
-        expect(testScr.cmd, 'echo');
-        expect(testScr.args, ['hello']);
+        expect(testScr.cmd, 'echo "hello"');
+        expect(testScr.args, []);
       });
     });
 
@@ -53,8 +53,8 @@ void main() {
         final conf = await ScriptRunnerConfig.get(fs);
         final testScr = conf.scriptsMap['test']!;
         expect(testScr.name, 'test');
-        expect(testScr.cmd, 'echo');
-        expect(testScr.args, ['hello']);
+        expect(testScr.cmd, 'echo "hello"');
+        expect(testScr.args, []);
       });
     });
   });
