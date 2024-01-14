@@ -27,10 +27,10 @@ script_runner:
     - doc: dart doc
     - name: version
       cmd: dart run btool get packageVersion
-      suppress_header_output: true
+      display_cmd: false
     - name: 'version:set'
       cmd: dart run btool set packageVersion
-      suppress_header_output: true
+      display_cmd: false
     - format: dart format --line-length 120 .
 
     # Examples
@@ -42,7 +42,7 @@ script_runner:
       args:
         - 'Hello World'
       description: test script foobar
-      suppress_header_output: true
+      display_cmd: false
     - name: activate-local
       cmd: dart pub global activate --source path ./
     - name: activate-global

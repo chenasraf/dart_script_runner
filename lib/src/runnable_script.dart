@@ -37,11 +37,11 @@ class RunnableScript {
   /// The script loader pre-loads these as temporary aliases to allow combined scripts to be run.
   List<RunnableScript> preloadScripts = [];
 
-  /// When set to [true], the command will not print "Running: ...". This is useful for using the output in
-  /// other scripts.
+  /// When set to [false], the command will not print "$ ..." before running the command.
+  /// This is useful for using the output in other scripts.
   ///
-  /// Defaults to [false].
-  final bool suppressHeaderOutput;
+  /// Defaults to [true].
+  final bool displayCmd;
 
   /// When set to [true], the command will end with a newline. This is useful for using the output in other scripts.
   ///
@@ -60,12 +60,13 @@ class RunnableScript {
     this.workingDir,
     this.env,
     FileSystem? fileSystem,
-    this.suppressHeaderOutput = false,
+    this.displayCmd = false,
     this.appendNewline = false,
   }) : _fileSystem = fileSystem ?? LocalFileSystem();
 
   /// Generate a runnable script from a yaml loaded map as defined in the config.
-  factory RunnableScript.fromYamlMap(yaml.YamlMap map, {FileSystem? fileSystem}) {
+  factory RunnableScript.fromYamlMap(yaml.YamlMap map,
+      {FileSystem? fileSystem}) {
     final out = <String, dynamic>{};
 
     if (map['name'] == null && map.keys.length == 1) {
@@ -73,13 +74,15 @@ class RunnableScript {
       out['cmd'] = map.values.first;
     } else {
       out.addAll(map.cast<String, dynamic>());
-      out['args'] = (map['args'] as yaml.YamlList?)?.map((e) => e.toString()).toList();
+      out['args'] =
+          (map['args'] as yaml.YamlList?)?.map((e) => e.toString()).toList();
       out['env'] = (map['env'] as yaml.YamlMap?)?.cast<String, String>();
     }
     try {
       return RunnableScript.fromMap(out, fileSystem: fileSystem);
     } catch (e) {
-      throw StateError('Failed to parse script, arguments: $map, $fileSystem. Error: $e');
+      throw StateError(
+          'Failed to parse script, arguments: $map, $fileSystem. Error: $e');
     }
   }
 
@@ -93,7 +96,7 @@ class RunnableScript {
     final cmd = rawCmd;
     final rawArgs = (map['args'] as List<String>?) ?? [];
     final description = map['description'] as String?;
-    final suppressHeaderText = map['suppress_header_output'] as bool? ?? false;
+    final displayCmd = map['display_cmd'] as bool? ?? true;
     final appendNewline = map['append_newline'] as bool? ?? false;
     // print('cmdArgs: $cmdArgs');
 
@@ -104,11 +107,12 @@ class RunnableScript {
         args: List<String>.from(rawArgs),
         fileSystem: fileSystem,
         description: description,
-        suppressHeaderOutput: suppressHeaderText,
+        displayCmd: displayCmd,
         appendNewline: appendNewline,
       );
     } catch (e) {
-      throw StateError('Failed to parse script, arguments: $map, $fileSystem. Error: $e');
+      throw StateError(
+          'Failed to parse script, arguments: $map, $fileSystem. Error: $e');
     }
   }
 
@@ -129,8 +133,8 @@ class RunnableScript {
 
     final origCmd = [cmd, ...effectiveArgs.map(_utils.quoteWrap)].join(' ');
 
-    if (!suppressHeaderOutput) {
-      print('\$ $origCmd');
+    if (displayCmd) {
+      print(_utils.colorize('\$ $origCmd', [_utils.TerminalColor.gray]));
     }
 
     try {
@@ -147,8 +151,6 @@ class RunnableScript {
         );
         throw e;
       }
-    } catch (e) {
-      rethrow;
     } finally {
       await _fileSystem.file(scrPath).delete();
     }
@@ -170,13 +172,18 @@ class RunnableScript {
     return exitCode;
   }
 
-  String _getScriptPath() => _fileSystem.path.join(_fileSystem.systemTempDirectory.path, 'script_runner_$name.sh');
+  String _getScriptPath() => _fileSystem.path
+      .join(_fileSystem.systemTempDirectory.path, 'script_runner_$name.sh');
 
   String _getScriptContents(
     ScriptRunnerConfig config, {
     List<String> extraArgs = const [],
   }) {
-    final script = "$cmd ${(args + extraArgs).map(_utils.quoteWrap).join(' ')}";
+    var script = cmd;
+    if (args.isNotEmpty || extraArgs.isNotEmpty) {
+      script += ' ';
+      script += (args + extraArgs).map(_utils.quoteWrap).join(' ').trim();
+    }
     switch (config.shell.os) {
       case OS.windows:
         return [
@@ -186,8 +193,12 @@ class RunnableScript {
         ].join('\n');
       case OS.linux:
       case OS.macos:
-        return [...preloadScripts.map((e) => "[[ ! \$(which ${e.name}) ]] && alias ${e.name}='scr ${e.name}'"), script]
-            .join('\n');
+        return [
+          ...preloadScripts.map((e) =>
+              "[[ ! \$(which ${e.name}) ]] && alias ${e.name}='scr ${e.name}'"),
+          script
+        ].join('\n');
     }
   }
 }
+
