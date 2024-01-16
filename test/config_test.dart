@@ -182,4 +182,3 @@ Future<void> _writePubspec(FileSystem fs, [String? contents]) async {
         ].join('\n'),
   );
 }
-

@@ -82,7 +82,6 @@ class ScriptRunnerConfig {
     final source = sourceMap.values.first;
     final configSource = sourceMap.keys.first;
 
-
     final env = <String, String>{}..addAll(
         (source['env'] as Map?)?.cast<String, String>() ?? {},
       );
@@ -175,8 +174,7 @@ class ScriptRunnerConfig {
 
   static Future<Map<String, Map>> _tryFindConfig(
       FileSystem fs, String startDir) async {
-    final explorer =
-        Unaconfig('script_runner', fs: fs);
+    final explorer = Unaconfig('script_runner', fs: fs);
     final config = await explorer.search();
     if (config != null) {
       final source = await explorer.findConfig();
@@ -294,4 +292,3 @@ enum OS {
   linux,
   // other
 }
-
