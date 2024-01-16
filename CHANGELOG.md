@@ -1,10 +1,12 @@
+## 0.6.0
+
+- Improve config loading & searching
+- Rename `suppress_header_output` to `display_cmd` and flipped the boolean logic
+
 ## 0.5.1
 
 - Fix bad command spliting in some cases
 - Less restrictive dependencies (compatible with Flutter stable)
-
-## 0.5.1
-
 - Use unlocked dependencies
 
 ## 0.5.0

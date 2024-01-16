@@ -1,6 +1,5 @@
 library script_runner;
 
-import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
 
@@ -176,28 +175,6 @@ class ScriptRunnerConfig {
 
   static Future<Map<String, Map>> _tryFindConfig(
       FileSystem fs, String startDir) async {
-    // final defaultParsers = <ConfigParser>[
-    //   ConfigParser(
-    //     RegExp(r'^pubspec\.yaml$'),
-    //     (name, path, contents) {
-    //       final map = ConfigParser.loadYamlAsMap(contents);
-    //       if (map.containsKey(name)) {
-    //         print('name: $name, map: $map');
-    //         print('Returning map: ${map[name]}');
-    //         return map[name];
-    //       }
-    //       return null;
-    //     },
-    //   ),
-    //   ConfigParser(
-    //     RegExp(r'\.json$'),
-    //     (name, path, contents) => json.decode(contents),
-    //   ),
-    //   ConfigParser(
-    //     RegExp(r'\.ya?ml$'),
-    //     (name, path, contents) => ConfigParser.loadYamlAsMap(contents),
-    //   ),
-    // ];
     final explorer =
         Unaconfig('script_runner', fs: fs);
     final config = await explorer.search();

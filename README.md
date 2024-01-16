@@ -3,19 +3,6 @@
 A general script runner for any type of project - run all your project-related scripts and commands
 in a portable, simple config.
 
-<details>
-<summary>Table of contents</summary>
-
-- [What for?](#what-for)
-- [Features](#features)
-- [Getting started](#getting-started)
-- [Usage](#usage)
-  - [Normal usage (config file)](#normal-usage-config-file)
-  - [Advanced usage (Dart import)](#advanced-usage-dart-import)
-- [Contributing](#contributing)
-
-</details>
-
 ---
 
 ## What for?
@@ -68,6 +55,8 @@ would you?)
 Add the `script_runner` config to your `pubspec.yaml` under `script_runner`, or alternatively you
 can use a separate config file named `script_runner.yaml` at the root of your project.
 
+If you are using a separate file, you may also use JSON instead of YAML, if you prefer.
+
 A bare-bones example looks like this:
 
 ```yaml
@@ -104,7 +93,7 @@ script_runner:
   line_length: 80
   # Scripts support either a short-format config, or a more verbose one with
   # more possible argument to pass to each script.
-  # Scripts can reference other scripts, e.g. `script1` can reference
+  # Scripts are aliased for the current, e.g. `script1` can reference
   # `script2` by calling it directly in the command:
   # - script1: echo '1'
   # - name: script2
@@ -124,13 +113,15 @@ script_runner:
       env:
         MY_ENV: my-value
         # ...
-      # Use to suppress the "Running: ..." output before running the command
-      # to make it possible to use ouput for other scripts
-      suppress_header_output: true
+      # Use `false` to hide the command itself before running it.
+      # This is useful for using the output in other scripts (scr or external)
+      # Defaults to true
+      display_cmd: true
       # The script to run. You can supply the args directly here, or split into
       # `cmd` and `args` as a list.
       cmd: my_scr 'arg1'
-      # Optional - if supplied, will be appended as arguments to `cmd`.
+      # Optional - if supplied, will be appended as arguments to `cmd`, before the args passed
+      # by calling the script from the CLI
       args:
         - arg2
         - arg3
@@ -190,6 +181,6 @@ If you are a developer and want to contribute code, here are some starting tips:
 1. Fork this repository
 2. Run `dart pub get`
 3. Make any changes you would like
-4. Create tests for your changes
-5. Update the relevant documentation (readme, code comments)
+4. Create tests for your changes, run all tests to make sure no regressions are introduced
+5. Update the relevant documentation (readme, code comments, changelog)
 6. Create a PR on upstream
