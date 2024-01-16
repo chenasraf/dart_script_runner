@@ -1,12 +1,12 @@
 library script_runner;
 
+import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:file/file.dart';
 import 'package:file/local.dart';
-import 'package:path/path.dart' as path;
-import 'package:yaml/yaml.dart' as yaml;
+import 'package:unaconfig/unaconfig.dart';
 
 import 'runnable_script.dart';
 import 'utils.dart';
@@ -76,14 +76,16 @@ class ScriptRunnerConfig {
     final sourceMap = await _tryFindConfig(fs, startDir);
 
     if (sourceMap.isEmpty) {
-      throw StateError('Must provide scripts in either pubspec.yaml or script_runner.yaml');
+      throw StateError(
+          'Must provide scripts in either pubspec.yaml or script_runner.yaml');
     }
 
     final source = sourceMap.values.first;
     final configSource = sourceMap.keys.first;
 
+
     final env = <String, String>{}..addAll(
-        (source['env'] as yaml.YamlMap?)?.cast<String, String>() ?? {},
+        (source['env'] as Map?)?.cast<String, String>() ?? {},
       );
 
     return ScriptRunnerConfig(
@@ -97,44 +99,13 @@ class ScriptRunnerConfig {
     );
   }
 
-  static Future<yaml.YamlMap?> _getPubspecConfig(FileSystem fileSystem, String folderPath) async {
-    final filePath = path.join(folderPath, 'pubspec.yaml');
-    final file = fileSystem.file(filePath);
-    if (!file.existsSync()) {
-      return null;
-    }
-    final pubspec = await file.readAsString();
-    final yaml.YamlMap contents = yaml.loadYaml(pubspec);
-    try {
-      final yaml.YamlMap? conf = contents['script_runner'];
-      return conf;
-    } catch (e) {
-      throw StateError(
-          'Expected YamlMap in pubspec.yaml under script_runner key, got: ${contents['script_runner'].runtimeType}');
-    }
-  }
-
-  static Future<yaml.YamlMap?>? _getCustomConfig(FileSystem fileSystem, String folderPath) async {
-    final filePath = path.join(folderPath, 'script_runner.yaml');
-    final file = fileSystem.file(filePath);
-    if (!file.existsSync()) {
-      return null;
-    }
-    final pubspec = await file.readAsString();
-    try {
-      final yaml.YamlMap? conf = yaml.loadYaml(pubspec);
-      return conf;
-    } catch (e) {
-      throw StateError(
-          'Expected YamlMap in pubspec.yaml under script_runner key, got: ${yaml.loadYaml(pubspec).runtimeType}');
-    }
-  }
-
   static List<RunnableScript> _parseScriptsList(
-    yaml.YamlList scriptsRaw, {
+    List<dynamic>? scriptsRaw, {
     FileSystem? fileSystem,
   }) {
-    final scripts = scriptsRaw.map((script) => RunnableScript.fromYamlMap(script, fileSystem: fileSystem)).toList();
+    final scripts = (scriptsRaw ?? [])
+        .map((script) => RunnableScript.fromMap(script, fileSystem: fileSystem))
+        .toList();
     return scripts.map((s) => s..preloadScripts = scripts).toList();
   }
 
@@ -179,7 +150,8 @@ class ScriptRunnerConfig {
         (configSource?.isNotEmpty == true
             ? [
                 colorize(' on ', titleStyle),
-                colorize(configSource!, [...titleStyle, TerminalColor.underline]),
+                colorize(
+                    configSource!, [...titleStyle, TerminalColor.underline]),
                 colorize(':', titleStyle)
               ].join('')
             : ':'),
@@ -193,7 +165,8 @@ class ScriptRunnerConfig {
         stripColors: true,
         wrapLine: (line) => colorize(line, [TerminalColor.gray]),
       );
-      printColor('  ${scr.name.padRight(padLen, ' ')} ${lines.first}', [TerminalColor.yellow]);
+      printColor('  ${scr.name.padRight(padLen, ' ')} ${lines.first}',
+          [TerminalColor.yellow]);
       for (final line in lines.sublist(1)) {
         print('  ${''.padRight(padLen, ' ')} $line');
       }
@@ -201,30 +174,39 @@ class ScriptRunnerConfig {
     }
   }
 
-  static Future<Map<String, yaml.YamlMap>> _tryFindConfig(FileSystem fs, String startDir) async {
-    var dir = fs.directory(startDir);
-    String sourceFile;
-    yaml.YamlMap? source;
-    bool rootSearched = false;
-    while (!rootSearched) {
-      if (dir.parent.path == dir.path) {
-        rootSearched = true;
+  static Future<Map<String, Map>> _tryFindConfig(
+      FileSystem fs, String startDir) async {
+    // final defaultParsers = <ConfigParser>[
+    //   ConfigParser(
+    //     RegExp(r'^pubspec\.yaml$'),
+    //     (name, path, contents) {
+    //       final map = ConfigParser.loadYamlAsMap(contents);
+    //       if (map.containsKey(name)) {
+    //         print('name: $name, map: $map');
+    //         print('Returning map: ${map[name]}');
+    //         return map[name];
+    //       }
+    //       return null;
+    //     },
+    //   ),
+    //   ConfigParser(
+    //     RegExp(r'\.json$'),
+    //     (name, path, contents) => json.decode(contents),
+    //   ),
+    //   ConfigParser(
+    //     RegExp(r'\.ya?ml$'),
+    //     (name, path, contents) => ConfigParser.loadYamlAsMap(contents),
+    //   ),
+    // ];
+    final explorer =
+        Unaconfig('script_runner', fs: fs);
+    final config = await explorer.search();
+    if (config != null) {
+      final source = await explorer.findConfig();
+      if (source != null) {
+        return {source: config};
       }
-      source = await _getPubspecConfig(fs, dir.path);
-      sourceFile = path.join(dir.path, 'pubspec.yaml');
-
-      if (source == null) {
-        source = await _getCustomConfig(fs, dir.path);
-        sourceFile = path.join(dir.path, 'script_runner.yaml');
-        if (source == null) {
-          dir = dir.parent;
-          continue;
-        }
-      }
-
-      return {sourceFile: source};
     }
-
     return {};
   }
 }
@@ -252,7 +234,7 @@ class ScriptRunnerShellConfig {
       if (obj is String) {
         return ScriptRunnerShellConfig(defaultShell: obj);
       }
-      if (obj is yaml.YamlMap || obj is Map) {
+      if (obj is Map || obj is Map) {
         return ScriptRunnerShellConfig(
           defaultShell: obj['default'],
           windows: obj['windows'],
@@ -335,3 +317,4 @@ enum OS {
   linux,
   // other
 }
+
