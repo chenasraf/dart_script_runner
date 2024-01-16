@@ -5,7 +5,6 @@ import 'package:file/local.dart';
 import 'package:script_runner/src/config.dart';
 // ignore: no_leading_underscores_for_library_prefixes
 import 'package:script_runner/src/utils.dart' as _utils;
-import 'package:yaml/yaml.dart' as yaml;
 
 /// A runnable script with pre-defined name, cmd and args. May be run using the `run` command and optionally
 /// supplying extra arguments to pass.
@@ -64,33 +63,20 @@ class RunnableScript {
     this.appendNewline = false,
   }) : _fileSystem = fileSystem ?? LocalFileSystem();
 
-  /// Generate a runnable script from a yaml loaded map as defined in the config.
-  factory RunnableScript.fromYamlMap(yaml.YamlMap map,
-      {FileSystem? fileSystem}) {
-    final out = <String, dynamic>{};
-
-    if (map['name'] == null && map.keys.length == 1) {
-      out['name'] = map.keys.first;
-      out['cmd'] = map.values.first;
-    } else {
-      out.addAll(map.cast<String, dynamic>());
-      out['args'] =
-          (map['args'] as yaml.YamlList?)?.map((e) => e.toString()).toList();
-      out['env'] = (map['env'] as yaml.YamlMap?)?.cast<String, String>();
-    }
-    try {
-      return RunnableScript.fromMap(out, fileSystem: fileSystem);
-    } catch (e) {
-      throw StateError(
-          'Failed to parse script, arguments: $map, $fileSystem. Error: $e');
-    }
-  }
-
   /// Generate a runnable script from a normal map as defined in the config.
   factory RunnableScript.fromMap(
     Map<String, dynamic> map, {
     FileSystem? fileSystem,
   }) {
+    if (map['name'] == null && map.keys.length == 1) {
+      map['name'] = map.keys.first;
+      map['cmd'] = map.values.first;
+    } else {
+      map.addAll(map.cast<String, dynamic>());
+      map['args'] =
+          (map['args'] as List?)?.map((e) => e.toString()).toList();
+      map['env'] = (map['env'] as Map?)?.cast<String, String>();
+    }
     final name = map['name'] as String;
     final rawCmd = map['cmd'] as String;
     final cmd = rawCmd;
