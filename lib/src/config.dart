@@ -75,8 +75,7 @@ class ScriptRunnerConfig {
     final sourceMap = await _tryFindConfig(fs, startDir);
 
     if (sourceMap.isEmpty) {
-      throw StateError(
-          'Must provide scripts in either pubspec.yaml or script_runner.yaml');
+      throw StateError('Must provide scripts in either pubspec.yaml or script_runner.yaml');
     }
 
     final source = sourceMap.values.first;
@@ -101,9 +100,7 @@ class ScriptRunnerConfig {
     List<dynamic>? scriptsRaw, {
     FileSystem? fileSystem,
   }) {
-    final scripts = (scriptsRaw ?? [])
-        .map((script) => RunnableScript.fromMap(script, fileSystem: fileSystem))
-        .toList();
+    final scripts = (scriptsRaw ?? []).map((script) => RunnableScript.fromMap(script, fileSystem: fileSystem)).toList();
     return scripts.map((s) => s..preloadScripts = scripts).toList();
   }
 
@@ -148,8 +145,7 @@ class ScriptRunnerConfig {
         (configSource?.isNotEmpty == true
             ? [
                 colorize(' on ', titleStyle),
-                colorize(
-                    configSource!, [...titleStyle, TerminalColor.underline]),
+                colorize(configSource!, [...titleStyle, TerminalColor.underline]),
                 colorize(':', titleStyle)
               ].join('')
             : ':'),
@@ -163,8 +159,7 @@ class ScriptRunnerConfig {
         stripColors: true,
         wrapLine: (line) => colorize(line, [TerminalColor.gray]),
       );
-      printColor('  ${scr.name.padRight(padLen, ' ')} ${lines.first}',
-          [TerminalColor.yellow]);
+      printColor('  ${scr.name.padRight(padLen, ' ')} ${lines.first}', [TerminalColor.yellow]);
       for (final line in lines.sublist(1)) {
         print('  ${''.padRight(padLen, ' ')} $line');
       }
@@ -172,8 +167,7 @@ class ScriptRunnerConfig {
     }
   }
 
-  static Future<Map<String, Map>> _tryFindConfig(
-      FileSystem fs, String startDir) async {
+  static Future<Map<String, Map>> _tryFindConfig(FileSystem fs, String startDir) async {
     final explorer = Unaconfig('script_runner', fs: fs);
     final config = await explorer.search();
     if (config != null) {
