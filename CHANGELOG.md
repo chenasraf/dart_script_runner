@@ -1,3 +1,7 @@
+## 0.6.1
+
+- Fix: Config path searching
+
 ## 0.6.0
 
 - Improve config loading & searching
