@@ -10,7 +10,7 @@ environment:
 dependencies:
   file: ^7.0.0
   path: '>=1.8.0 <2.0.0'
-  unaconfig: ^0.1.4
+  unaconfig: ^0.2.0
   # unaconfig:
   #   path: ../unaconfig
 
