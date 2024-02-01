@@ -3,6 +3,9 @@
 A general script runner for any type of project - run all your project-related scripts and commands
 in a portable, simple config.
 
+![script_runner help output](https://github.com/chenasraf/dart_script_runner/assets/167217/d172cd98-c041-48ff-80cc-a24c80e635c7)
+
+
 ---
 
 ## What for?
