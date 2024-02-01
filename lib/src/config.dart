@@ -173,7 +173,7 @@ class ScriptRunnerConfig {
     if (config != null) {
       final source = await explorer.findConfig();
       if (source != null) {
-        return {source: config};
+        return {source.path: config};
       }
     }
     return {};
