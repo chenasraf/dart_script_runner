@@ -75,7 +75,8 @@ class ScriptRunnerConfig {
     final sourceMap = await _tryFindConfig(fs, startDir);
 
     if (sourceMap.isEmpty) {
-      throw StateError('Must provide scripts in either pubspec.yaml or script_runner.yaml');
+      throw StateError(
+          'Must provide scripts in either pubspec.yaml or script_runner.yaml');
     }
 
     final source = sourceMap.values.first;
@@ -100,7 +101,9 @@ class ScriptRunnerConfig {
     List<dynamic>? scriptsRaw, {
     FileSystem? fileSystem,
   }) {
-    final scripts = (scriptsRaw ?? []).map((script) => RunnableScript.fromMap(script, fileSystem: fileSystem)).toList();
+    final scripts = (scriptsRaw ?? [])
+        .map((script) => RunnableScript.fromMap(script, fileSystem: fileSystem))
+        .toList();
     return scripts.map((s) => s..preloadScripts = scripts).toList();
   }
 
@@ -126,14 +129,7 @@ class ScriptRunnerConfig {
     final titleStyle = [TerminalColor.bold, TerminalColor.brightWhite];
     printColor('Built-in flags:', titleStyle);
     print('');
-    var maxLen = '-h, --help'.length;
-    for (final scr in scripts) {
-      maxLen = math.max(maxLen, scr.name.length);
-    }
-    final padLen = maxLen + 6;
-    print('  ${colorize('-h, --help'.padRight(padLen, ' '), [
-          TerminalColor.yellow
-        ])} ${colorize('Print this help message', [TerminalColor.gray])}');
+    printBuiltins();
     print('');
 
     print(
@@ -145,21 +141,74 @@ class ScriptRunnerConfig {
         (configSource?.isNotEmpty == true
             ? [
                 colorize(' on ', titleStyle),
-                colorize(configSource!, [...titleStyle, TerminalColor.underline]),
+                colorize(
+                    configSource!, [...titleStyle, TerminalColor.underline]),
                 colorize(':', titleStyle)
               ].join('')
             : ':'),
       ].join(''),
     );
     print('');
+    printScripts();
+  }
+
+  int _getPadLen(List<String> lines, [int? initial]) {
+    var maxLen = initial ?? 0;
     for (final scr in scripts) {
+      maxLen = math.max(maxLen, scr.name.length);
+    }
+    final padLen = maxLen + 6;
+    return padLen;
+  }
+
+  /// Prints the list of scripts in the config.
+  ///
+  /// If [search] is provided, it filters the scripts to only those that contain the search string.
+  void printScripts([String search = '']) {
+    var maxLen = '-h, --help'.length;
+
+    final filtered = search.isEmpty
+        ? scripts
+        : scripts
+            .where((scr) => [scr.name, scr.description]
+                .any((s) => s != null && s.contains(search)))
+            .toList();
+
+    final mapped = filtered
+        .map((scr) => TableRow(scr.name,
+            scr.description ?? '\$ ${[scr.cmd, ...scr.args].join(' ')}'))
+        .toList();
+
+    final padLen = _getPadLen(mapped.map((r) => r.name).toList(), maxLen);
+
+    _printTable(mapped, padLen);
+  }
+
+  /// Prints the list of scripts in the config.
+  ///
+  /// If [search] is provided, it filters the scripts to only those that contain the search string.
+  void printBuiltins([String search = '']) {
+    final builtins = [
+      TableRow('-ls, --list [search]',
+          'List available scripts. Add search term to filter.'),
+      TableRow('-h, --help', 'Print this help message'),
+    ];
+
+    final padLen = _getPadLen(builtins.map((b) => b.name).toList());
+
+    _printTable(builtins, padLen);
+  }
+
+  void _printTable(List<TableRow> filtered, int padLen) {
+    for (final scr in filtered) {
       final lines = chunks(
-        scr.description ?? '\$ ${[scr.cmd, ...scr.args].join(' ')}',
+        scr.description,
         lineLength - padLen,
         stripColors: true,
         wrapLine: (line) => colorize(line, [TerminalColor.gray]),
       );
-      printColor('  ${scr.name.padRight(padLen, ' ')} ${lines.first}', [TerminalColor.yellow]);
+      printColor('  ${scr.name.padRight(padLen, ' ')} ${lines.first}',
+          [TerminalColor.yellow]);
       for (final line in lines.sublist(1)) {
         print('  ${''.padRight(padLen, ' ')} $line');
       }
@@ -167,7 +216,8 @@ class ScriptRunnerConfig {
     }
   }
 
-  static Future<Map<String, Map>> _tryFindConfig(FileSystem fs, String startDir) async {
+  static Future<Map<String, Map>> _tryFindConfig(
+      FileSystem fs, String startDir) async {
     final explorer = Unaconfig('script_runner', fs: fs);
     final config = await explorer.search();
     if (config != null) {
@@ -286,3 +336,11 @@ enum OS {
   linux,
   // other
 }
+
+class TableRow {
+  final String name;
+  final String description;
+
+  TableRow(this.name, this.description);
+}
+

@@ -1,3 +1,7 @@
+## 0.7.0
+
+- Add `-ls`/`--list` flag
+
 ## 0.6.2
 
 - Update dependencies

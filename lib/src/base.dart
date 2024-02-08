@@ -10,6 +10,11 @@ Future<void> runScript(String entryName, List<String> args) async {
     config.printUsage();
     return;
   }
+  if (['-ls', '--list'].contains(entryName)) {
+    final search = args.isNotEmpty ? args.first : '';
+    config.printScripts(search);
+    return;
+  }
   final entry = config.scriptsMap[entryName];
   if (entry == null) {
     throw StateError(
