@@ -5,7 +5,6 @@ in a portable, simple config.
 
 ![script_runner help output](https://github.com/chenasraf/dart_script_runner/assets/167217/d172cd98-c041-48ff-80cc-a24c80e635c7)
 
-
 ---
 
 ## What for?
@@ -37,19 +36,34 @@ to work similarly, though it can be customized to fit your needs more specifical
 
 You can install this package globally for the most easy usage.
 
-```shell
+```sh
 pub global activate script_runner
 ```
 
 Once activated, you can use the supplied `scr` executable to directly call scripts from any project
 you are currently in.
 
-```shell
+```sh
 scr my-script ...args
 ```
 
 You can also install this package as a dependency and build/run your own script lists. (but why
 would you?)
+
+### Built-in Commands
+
+To get help, including the list of all scripts available in the current directory, run:
+
+```sh
+scr -h
+```
+
+To list all the scripts, with the ability to search, use:
+
+```sh
+scr -ls # see all
+scr -ls terms # search for "terms"
+```
 
 ## Usage
 
