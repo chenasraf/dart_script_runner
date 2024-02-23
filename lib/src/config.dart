@@ -286,7 +286,7 @@ class ScriptRunnerShellConfig {
     }
   }
 
-  /// The current OS of the system, of those supported by [ScriptRunner]
+  /// The current OS of the system, of those supported by [RunnableScript]
   OS get os {
     if (Platform.isWindows) {
       return OS.windows;

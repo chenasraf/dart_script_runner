@@ -36,15 +36,15 @@ class RunnableScript {
   /// The script loader pre-loads these as temporary aliases to allow combined scripts to be run.
   List<RunnableScript> preloadScripts = [];
 
-  /// When set to [false], the command will not print "$ ..." before running the command.
+  /// When set to `false`, the command will not print "$ ..." before running the command.
   /// This is useful for using the output in other scripts.
   ///
-  /// Defaults to [true].
+  /// Defaults to `true`.
   final bool displayCmd;
 
-  /// When set to [true], the command will end with a newline. This is useful for using the output in other scripts.
+  /// When set to `true`, the command will end with a newline. This is useful for using the output in other scripts.
   ///
-  /// Defaults to [false].
+  /// Defaults to `false`.
   final bool appendNewline;
 
   FileSystem _fileSystem;
