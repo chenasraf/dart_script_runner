@@ -1,3 +1,7 @@
+## 0.7.2
+
+- Dev dependency fixes
+
 ## 0.7.1
 
 - Update dependencies
