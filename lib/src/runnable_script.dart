@@ -101,7 +101,7 @@ class RunnableScript {
   }
 
   /// Runs the current script with the given extra arguments.
-  Future<dynamic> run(List<String> extraArgs) async {
+  Future<int> run(List<String> extraArgs) async {
     final effectiveArgs = args + extraArgs;
     final config = await ScriptRunnerConfig.get(_fileSystem);
 
@@ -135,6 +135,7 @@ class RunnableScript {
         );
         throw e;
       }
+      return exitCode;
     } finally {
       await _fileSystem.file(scrPath).delete();
     }
