@@ -1,5 +1,6 @@
-## 0.7.2
+## 0.7.3
 
+- Fix: Exit with code
 - Dev dependency fixes
 
 ## 0.7.1
