@@ -57,6 +57,43 @@ void main() {
         expect(testScr.args, []);
       });
     });
+
+    group('env injection', () {
+      fs = MemoryFileSystem();
+      final fooFile = fs.file('/tmp/foo.txt');
+
+      setUp(() async {
+        fs = MemoryFileSystem();
+        await _writePubspec(
+          fs,
+          [
+            'script_runner:',
+            '  shell:',
+            '    linux: /bin/zsh',
+            '    macos: /bin/bash',
+            '    windows: powershell.exe',
+            '  scripts:',
+            '    - name: test',
+            '      cwd: .',
+            '      cmd: "echo \\"\$FOO\\" > ${fooFile.path}"',
+            '      env:',
+            '        FOO: bar',
+          ].join('\n'),
+        );
+      });
+
+      test('works', () async {
+        final conf = await ScriptRunnerConfig.get(fs);
+        final testScr = conf.scriptsMap['test']!;
+        expect(testScr.name, 'test');
+        expect(testScr.cmd, 'echo "\$FOO" > ${fooFile.path}');
+        expect(testScr.args, []);
+        expect(testScr.env, {'FOO': 'bar'});
+        // await testScr.run();
+        // final contents = await fooFile.readAsString();
+        // expect(contents, 'bar\n');
+      });
+    });
   });
 
   group('ScriptRunnerShellConfig', () {

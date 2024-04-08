@@ -1,6 +1,6 @@
 name: script_runner
 description: Run all your project-related scripts in a portable, simple config.
-version: 0.7.3
+version: 0.7.4
 homepage: https://casraf.dev/projects/dart-script-runner
 repository: https://github.com/chenasraf/dart_script_runner
 license: MIT

@@ -2,6 +2,7 @@ import 'dart:io' as io;
 
 import 'package:file/file.dart';
 import 'package:file/local.dart';
+import 'package:file/memory.dart';
 import 'package:script_runner/src/config.dart';
 // ignore: no_leading_underscores_for_library_prefixes
 import 'package:script_runner/src/utils.dart' as _utils;
@@ -30,7 +31,7 @@ class RunnableScript {
 
   /// The environment variables to run the script in.
   /// This map is appended to the one given in the config.
-  final Map<String, String>? env;
+  final Map<String, String> env;
 
   /// Other scripts in the config which are runnable by this script.
   /// The script loader pre-loads these as temporary aliases to allow combined scripts to be run.
@@ -57,7 +58,7 @@ class RunnableScript {
     required this.args,
     this.description,
     this.workingDir,
-    this.env,
+    this.env = const {},
     FileSystem? fileSystem,
     this.displayCmd = false,
     this.appendNewline = false,
@@ -94,6 +95,7 @@ class RunnableScript {
         description: description,
         displayCmd: displayCmd,
         appendNewline: appendNewline,
+        env: map['env'] as Map<String, String>? ?? {},
       );
     } catch (e) {
       throw StateError('Failed to parse script, arguments: $map, $fileSystem. Error: $e');
@@ -101,16 +103,17 @@ class RunnableScript {
   }
 
   /// Runs the current script with the given extra arguments.
-  Future<int> run(List<String> extraArgs) async {
+  Future<int> run([List<String> extraArgs = const []]) async {
     final effectiveArgs = args + extraArgs;
     final config = await ScriptRunnerConfig.get(_fileSystem);
 
     final scrContents = _getScriptContents(config, extraArgs: extraArgs);
     final scrPath = _getScriptPath();
+    final scrFile = _fileSystem.file(scrPath);
 
-    await _fileSystem.file(scrPath).writeAsString(scrContents);
+    await scrFile.writeAsString(scrContents);
 
-    if (config.shell.os != OS.windows) {
+    if (config.shell.os != OS.windows && _fileSystem is! MemoryFileSystem) {
       final result = await io.Process.run("chmod", ["u+x", scrPath]);
       if (result.exitCode != 0) throw Exception(result.stderr);
     }
@@ -148,7 +151,7 @@ class RunnableScript {
     final result = await io.Process.start(
       config.shell.shell,
       [config.shell.shellExecFlag, scrPath],
-      environment: {...?config.env, ...?env},
+      environment: {...?config.env, ...env},
       workingDirectory: workingDir ?? config.workingDir,
       mode: io.ProcessStartMode.inheritStdio,
       includeParentEnvironment: true,

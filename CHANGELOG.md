@@ -1,3 +1,8 @@
+## 0.7.4
+
+- Fix: Script ENV not being passed properly
+- Update dependencies
+
 ## 0.7.3
 
 - Fix: Exit with code

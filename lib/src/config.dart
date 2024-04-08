@@ -90,7 +90,7 @@ class ScriptRunnerConfig {
       scripts: _parseScriptsList(source['scripts'], fileSystem: fs),
       env: env,
       workingDir: source['cwd'],
-      fileSystem: fileSystem,
+      fileSystem: fs,
       lineLength: source['line_length'] ?? 80,
       configSource: configSource,
     );
