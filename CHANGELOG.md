@@ -1,3 +1,7 @@
+## 0.7.6
+
+- Fix: docs
+
 ## 0.7.5
 
 - Feat: Command suggestions by prefix

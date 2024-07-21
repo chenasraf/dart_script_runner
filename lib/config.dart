@@ -1,5 +1,3 @@
-library script_runner;
-
 import 'dart:io';
 import 'dart:math' as math;
 

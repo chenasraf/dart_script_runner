@@ -1,6 +1,6 @@
 name: script_runner
 description: Run all your project-related scripts in a portable, simple config.
-version: 0.7.5
+version: 0.7.6
 homepage: https://casraf.dev/projects/dart-script-runner
 repository: https://github.com/chenasraf/dart_script_runner
 license: MIT
@@ -25,8 +25,8 @@ script_runner:
     # Real
     # ================================================================================
     - auto-fix: dart fix --apply
-    - publish: dart format .; dart pub publish
-    - publish:dry: dart pub publish --dry-run
+    - publish: dart format .; dart doc && dart pub publish
+    - publish:dry: dart doc --dry-run && dart pub publish --dry-run
     - doc: dart doc
     - name: version
       cmd: dart run btool get packageVersion
