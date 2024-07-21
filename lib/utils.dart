@@ -134,3 +134,10 @@ class TerminalColor {
   static const TerminalColor bold = TerminalColor._(1);
   static const TerminalColor underline = TerminalColor._(4);
 }
+
+class ScriptStateError extends StateError {
+  ScriptStateError(super.message);
+
+  @override
+  String toString() => message;
+}

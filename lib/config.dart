@@ -75,7 +75,7 @@ class ScriptRunnerConfig {
     final sourceMap = await _tryFindConfig(fs, startDir);
 
     if (sourceMap.isEmpty) {
-      throw StateError('Must provide scripts in either pubspec.yaml or script_runner.yaml');
+      throw ScriptStateError('Must provide scripts in either pubspec.yaml or script_runner.yaml');
     }
 
     final source = sourceMap.values.first;
@@ -235,7 +235,7 @@ class ScriptRunnerShellConfig {
   });
 
   /// Parses a shell configuration from a [YamlMap], [Map] or [String].
-  /// Other types will throw a [StateError].
+  /// Other types will throw a [ScriptStateError].
   factory ScriptRunnerShellConfig.parse(dynamic obj) {
     try {
       if (obj is String) {
@@ -252,9 +252,9 @@ class ScriptRunnerShellConfig {
       if (obj == null) {
         return ScriptRunnerShellConfig();
       }
-      throw StateError('Invalid shell config: $obj');
+      throw ScriptStateError('Invalid shell config: $obj');
     } catch (e) {
-      throw StateError('Error while parsing config: $obj');
+      throw ScriptStateError('Error while parsing config: $obj');
     }
   }
 
@@ -295,7 +295,7 @@ class ScriptRunnerShellConfig {
     } else if (Platform.isLinux) {
       return OS.linux;
     }
-    throw StateError('Unsupported OS: ${Platform.operatingSystem}');
+    throw ScriptStateError('Unsupported OS: ${Platform.operatingSystem}');
     // return OS.unknown;
   }
 

@@ -1,3 +1,7 @@
+## 0.7.5
+
+- Feat: Command suggestions by prefix
+
 ## 0.7.4
 
 - Fix: Script ENV not being passed properly

@@ -1,7 +1,7 @@
 import 'dart:io' as io;
 
-import 'package:script_runner/src/base.dart';
-import 'package:script_runner/src/utils.dart';
+import 'package:script_runner/base.dart';
+import 'package:script_runner/utils.dart';
 
 /// Main entrypoint for CMD script runner.
 Future<void> main(List<String> args) async {
@@ -15,7 +15,11 @@ Future<void> main(List<String> args) async {
     final code = await runScript(scriptCmd, scriptArgs);
     io.exit(code);
   } catch (e, stack) {
-    printColor('$e\n$stack', [TerminalColor.red]);
+    if (e is ScriptStateError) {
+      printColor(e.toString(), [TerminalColor.red]);
+    } else {
+      printColor('$e\n$stack', [TerminalColor.red]);
+    }
     if (e is io.ProcessException) {
       io.exit(e.errorCode);
     }

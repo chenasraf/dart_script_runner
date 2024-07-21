@@ -3,9 +3,11 @@ import 'dart:io' as io;
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:file/memory.dart';
-import 'package:script_runner/src/config.dart';
+
+import 'config.dart';
 // ignore: no_leading_underscores_for_library_prefixes
-import 'package:script_runner/src/utils.dart' as _utils;
+import 'utils.dart' as _utils;
+import 'utils.dart';
 
 /// A runnable script with pre-defined name, cmd and args. May be run using the `run` command and optionally
 /// supplying extra arguments to pass.
@@ -98,7 +100,7 @@ class RunnableScript {
         env: map['env'] as Map<String, String>? ?? {},
       );
     } catch (e) {
-      throw StateError('Failed to parse script, arguments: $map, $fileSystem. Error: $e');
+      throw ScriptStateError('Failed to parse script, arguments: $map, $fileSystem. Error: $e');
     }
   }
 
