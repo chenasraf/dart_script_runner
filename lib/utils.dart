@@ -135,9 +135,20 @@ class TerminalColor {
   static const TerminalColor underline = TerminalColor._(4);
 }
 
-class ScriptStateError extends StateError {
-  ScriptStateError(super.message);
+/// An error that occurs that is related to a script.
+class ScriptError extends StateError {
+  ScriptError(super.message);
 
   @override
   String toString() => message;
+}
+
+/// An error that occurs during script execution.
+class ScriptStateError extends ScriptError {
+  ScriptStateError(super.message);
+}
+
+/// An error that occurs when a script is not found.
+class ScriptNotFoundError extends ScriptError {
+  ScriptNotFoundError(super.message);
 }

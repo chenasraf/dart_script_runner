@@ -6,7 +6,9 @@ import 'package:script_runner/utils.dart';
 /// Main entrypoint for CMD script runner.
 Future<void> main(List<String> args) async {
   if (args.isEmpty) {
-    printColor('No script command provided. Use -h to see available commands.', [TerminalColor.red]);
+    printColor(
+        'No script command provided. Use -h or -ls to see available commands.',
+        [TerminalColor.red]);
     return;
   }
   final scriptCmd = args.first;
@@ -15,13 +17,15 @@ Future<void> main(List<String> args) async {
     final code = await runScript(scriptCmd, scriptArgs);
     io.exit(code);
   } catch (e, stack) {
-    if (e is ScriptStateError) {
+    if (e is ScriptError) {
       printColor(e.toString(), [TerminalColor.red]);
-    } else {
-      printColor('$e\n$stack', [TerminalColor.red]);
-    }
-    if (e is io.ProcessException) {
+    } else if (e is io.ProcessException) {
+      printColor(
+          'Error in script "$scriptCmd": ${e.message}', [TerminalColor.red]);
       io.exit(e.errorCode);
+    } else {
+      printColor('Error executing script: $e\n$stack', [TerminalColor.red]);
+      io.exit(1);
     }
   }
 }

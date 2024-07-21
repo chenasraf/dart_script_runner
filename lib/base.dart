@@ -7,7 +7,7 @@ Future<int> runScript(String entryName, List<String> args) async {
   final config = await ScriptRunnerConfig.get();
 
   if (config.scripts.isEmpty) {
-    throw ScriptStateError('No scripts found');
+    throw ScriptNotFoundError('No scripts found');
   }
 
   if (['-h', '--help'].contains(entryName)) {
@@ -24,27 +24,32 @@ Future<int> runScript(String entryName, List<String> args) async {
   final entry = config.scriptsMap[entryName];
 
   if (entry == null) {
-    final suggestions =
-        config.scriptsMap.keys.where((key) => key.toLowerCase().startsWith(entryName.toLowerCase())).toList();
+    final suggestions = config.scriptsMap.keys
+        .where((key) => key.toLowerCase().startsWith(entryName.toLowerCase()))
+        .toList();
 
     if (suggestions.isNotEmpty) {
       if (suggestions.length == 1) {
-        throw ScriptStateError(
+        throw ScriptNotFoundError(
           'No script named "$entryName" found. Did you mean "${suggestions.single}"?',
         );
       } else {
-        throw ScriptStateError(
+        throw ScriptNotFoundError(
           'No script named "$entryName" found.\n'
           'Did you mean one of: "${suggestions.join('", "')}"?',
         );
       }
     } else {
-      throw ScriptStateError(
+      throw ScriptNotFoundError(
         'No script named "$entryName" found.\n'
         'Available scripts: ${config.scriptsMap.keys.join('", "')}',
       );
     }
   }
 
-  return entry.run(args);
+  try {
+    return entry.run(args);
+  } catch (e, stack) {
+    throw ScriptError('Error running script "$entryName": $e\n$stack');
+  }
 }

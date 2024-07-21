@@ -20,11 +20,12 @@ dev_dependencies:
   btool: any
 
 script_runner:
-  # line_length: 100
   scripts:
+    # ================================================================================
     # Real
+    # ================================================================================
     - auto-fix: dart fix --apply
-    - publish: dart format .; dart pub publish; format
+    - publish: dart format .; dart pub publish
     - publish:dry: dart pub publish --dry-run
     - doc: dart doc
     - name: version
@@ -33,15 +34,13 @@ script_runner:
     - name: 'version:set'
       cmd: dart run btool set packageVersion
       display_cmd: false
-    - format: dart format --line-length 120 .
-    - name: clean
-      cmd: rm -rf .dart_tool/pub/bin/script_runner/script_runner.dart-*.snapshot
-    - name: activate-local
-      cmd: scr clean && dart pub global deactivate script_runner; dart pub global activate --source path ./
-    - name: activate-global
-      cmd: scr clean && dart pub global deactivate script_runner; dart pub global activate script_runner
+    - clean: rm -rf .dart_tool/pub/bin/script_runner/script_runner.dart-*.snapshot
+    - activate-local: scr clean && dart pub global deactivate script_runner; dart pub global activate --source path ./
+    - activate-global: scr clean && dart pub global deactivate script_runner; dart pub global activate script_runner
 
+    # ================================================================================
     # Examples
+    # ================================================================================
     - name: echo1
       cmd: echo "Hello World" $SHELL
       description: Interdum a scelerisque arcu felis taciti ligula pellentesque curabitur, suspendisse adipiscing quisque sed luctus elementum in imperdiet id, praesent enim sem justo sapien diam nec. Quisque erat risus sagittis penatibus per, vehicula sociosqu cubilia convallis, sollicitudin scelerisque cras aptent. Natoque ornare dictumst netus litora mollis suspendisse cubilia proin morbi primis consequat eu massa, cursus non urna ridiculus dolor duis tempus ut nam velit lacus viverra. A interdum senectus eu mus leo aptent facilisi augue tristique ante purus condimentum pulvinar porta viverra morbi, et tellus gravida porttitor non euismod suscipit neque egestas praesent arcu luctus pharetra fusce. Luctus mauris a venenatis tempus cras ante efficitur massa ultricies mollis lacus, volutpat nisi lacinia himenaeos facilisi in aliquet sodales purus integer vitae quisque, libero torquent enim mattis placerat tortor mi dignissim viverra sem.

@@ -184,7 +184,8 @@ Future<void> _writeCustomConf(FileSystem fs, [String? contents]) async {
   final homeDir = fs.directory(Platform.environment['HOME']!);
   homeDir.create(recursive: true);
   fs.currentDirectory = homeDir;
-  final pubFile = fs.file(path.join(fs.currentDirectory.path, 'script_runner.yaml'));
+  final pubFile =
+      fs.file(path.join(fs.currentDirectory.path, 'script_runner.yaml'));
   pubFile.create(recursive: true);
   print('writing custom conf to ${pubFile.path}');
   await pubFile.writeAsString(
